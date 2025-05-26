@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Du kéfir pour Inès - Site E-commerce
 
-## Getting Started
+Site e-commerce minimaliste pour la vente de kéfir artisanal, créé avec Next.js et Tailwind CSS.
 
-First, run the development server:
+## Fonctionnalités
+
+- Catalogue de produits avec différentes tailles disponibles
+- Système de commande avec choix de livraison ou retrait
+- Paiement par carte bancaire (Stripe) ou espèces
+- Sélection de créneau horaire pour la livraison/le retrait
+- Envoi d'emails de confirmation
+- Interface responsive et moderne
+
+## Prérequis
+
+- Node.js 18+ et npm
+- Compte Stripe pour les paiements par carte
+- Compte SMTP pour l'envoi d'emails (Gmail, Mailtrap, etc.)
+
+## Installation
+
+1. Cloner le repository :
+```bash
+git clone <repository-url>
+cd dukefirpourines
+```
+
+2. Installer les dépendances :
+```bash
+npm install
+```
+
+3. Créer le fichier `.env.local` avec les variables suivantes :
+```env
+# Stripe
+STRIPE_PUBLIC_KEY=pk_test_your_key
+STRIPE_SECRET_KEY=sk_test_your_key
+
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+COMPANY_NAME="Du kéfir pour Inès"
+COMPANY_EMAIL=contact@dukefirpourines.fr
+```
+
+## Développement
+
+Pour lancer le serveur de développement :
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le site sera accessible à l'adresse : http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Pour construire et démarrer en production :
 
-## Learn More
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Déploiement
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Le projet est configuré pour être déployé sur Vercel ou Netlify. Il suffit de connecter le repository et de configurer les variables d'environnement sur la plateforme choisie.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure du projet
 
-## Deploy on Vercel
+- `/src/app` - Pages et composants Next.js
+- `/src/components` - Composants réutilisables
+- `/src/lib` - Utilitaires et services (email, etc.)
+- `/src/types` - Types TypeScript
+- `/src/data` - Données statiques (produits)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Personnalisation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Produits
+
+Les produits sont définis dans `/src/data/products.json`. Chaque produit a :
+- Un ID unique
+- Un nom
+- Une description
+- Des variantes (tailles et prix)
+- Une image
+
+### Styles
+
+Les styles utilisent Tailwind CSS et peuvent être personnalisés dans :
+- `tailwind.config.js` - Configuration Tailwind
+- `src/app/globals.css` - Styles globaux
+
+## Support
+
+Pour toute question ou problème, veuillez créer une issue dans le repository GitHub.

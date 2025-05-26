@@ -1,0 +1,84 @@
+{
+  "products": [
+    {
+      "id": "kefir-gingembre",
+      "name": "Kéfir Gingembre",
+      "description": "L'alliance parfaite entre le kéfir et le gingembre frais. Une boisson tonifiante avec une touche épicée, idéale pour stimuler votre vitalité.",
+      "variants": [
+        {
+          "size": "75cl",
+          "price": 4.50
+        },
+        {
+          "size": "100cl",
+          "price": 5.00
+        }
+      ],
+      "image": "kefir.jpg"
+    },
+    {
+      "id": "kefir-concombre-kiwi",
+      "name": "Kéfir Concombre-Kiwi",
+      "description": "Une combinaison rafraîchissante de concombre et de kiwi. Un mélange unique et désaltérant, parfait pour les journées chaudes.",
+      "variants": [
+        {
+          "size": "75cl",
+          "price": 4.50
+        },
+        {
+          "size": "100cl",
+          "price": 5.00
+        }
+      ],
+      "image": "kefir.jpg"
+    },
+    {
+      "id": "kefir-fruit-passion",
+      "name": "Kéfir Fruit de la Passion",
+      "description": "L'exotisme du fruit de la passion associé à notre kéfir traditionnel. Une explosion de saveurs tropicales et d'énergie vitale.",
+      "variants": [
+        {
+          "size": "75cl",
+          "price": 4.50
+        },
+        {
+          "size": "100cl",
+          "price": 5.00
+        }
+      ],
+      "image": "kefir.jpg"
+    },
+    {
+      "id": "kefir-cassis-menthe",
+      "name": "Kéfir Cassis-Menthe",
+      "description": "Un mariage subtil entre le cassis fruité et la fraîcheur de la menthe. Une boisson équilibrée aux notes gourmandes et vivifiantes.",
+      "variants": [
+        {
+          "size": "75cl",
+          "price": 4.50
+        },
+        {
+          "size": "100cl",
+          "price": 5.00
+        }
+      ],
+      "image": "kefir.jpg"
+    },
+    {
+      "id": "kefir-framboise-hibiscus",
+      "name": "Kéfir Framboise-Hibiscus",
+      "description": "La douceur de la framboise sublimée par les notes florales de l'hibiscus. Un kéfir élégant aux propriétés antioxydantes.",
+      "variants": [
+        {
+          "size": "75cl",
+          "price": 4.50
+        },
+        {
+          "size": "100cl",
+          "price": 5.00
+        }
+      ],
+      "image": "kefir.jpg"
+    }
+  ]
+} 
