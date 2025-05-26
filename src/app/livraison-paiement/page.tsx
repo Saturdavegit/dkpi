@@ -12,6 +12,7 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { fr } from 'date-fns/locale';
 import { addDays, setHours, setMinutes } from 'date-fns';
+import ScrollIndicator from '@/components/ScrollIndicator';
 
 registerLocale('fr', fr);
 
@@ -22,7 +23,7 @@ const DELIVERY_FEE = 10;
 const TIME_SLOTS = ['10h-12h', '14h-16h', '16h-18h'] as const;
 
 export default function LivraisonPaiement() {
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('atelier');
@@ -81,6 +82,7 @@ export default function LivraisonPaiement() {
       if (paymentMethod === 'carte') {
         router.push('/paiement');
       } else {
+        // Pour le paiement en espèces
         const response = await fetch('/api/submit-order', {
           method: 'POST',
           headers: {
@@ -97,22 +99,37 @@ export default function LivraisonPaiement() {
           }),
         });
 
-        if (response.ok) {
-          router.push('/commande-confirmee');
-        } else {
-          throw new Error('Erreur lors de la soumission de la commande');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Erreur lors de la soumission de la commande');
         }
+
+        // Si tout est OK, on vide le panier
+        clearCart();
+        
+        // Redirection vers la page de confirmation avec un délai pour s'assurer que le panier est vidé
+        setTimeout(() => {
+          router.push('/commande-confirmee');
+        }, 100);
       }
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error('Une erreur est survenue. Veuillez réessayer.');
+      
+      // Affichage d'un message d'erreur plus détaillé
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Une erreur inattendue est survenue. Veuillez réessayer ou nous contacter si le problème persiste.');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 sm:pb-12">
+    <div className="min-h-screen bg-gray-100 pb-24 sm:pb-12">
+      <ScrollIndicator />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -144,10 +161,10 @@ export default function LivraisonPaiement() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white shadow-sm rounded-lg overflow-hidden mb-8"
+            className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
-            <div className="p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Vos informations</h2>
+            <div className="p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Vos informations</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -210,53 +227,53 @@ export default function LivraisonPaiement() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white shadow-sm rounded-lg overflow-hidden mb-8"
+            className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
-            <div className="p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Mode de livraison</h2>
+            <div className="p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Mode de livraison</h2>
               <div className="space-y-4">
-                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="delivery"
                     value="atelier"
                     checked={deliveryOption === 'atelier'}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Retrait à l'atelier</div>
-                    <div className="text-sm text-gray-600">Gratuit - Retrait à l'atelier de Claire</div>
+                    <div className="text-gray-700 text-sm">Gratuit - Retrait à l'atelier de Claire</div>
                   </div>
                 </label>
 
-                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="delivery"
                     value="bureau"
                     checked={deliveryOption === 'bureau'}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Retrait au bureau</div>
-                    <div className="text-sm text-gray-600">Gratuit - Retrait au bureau de Levallois</div>
+                    <div className="text-gray-700 text-sm">Gratuit - Retrait au bureau de Levallois</div>
                   </div>
                 </label>
 
-                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="delivery"
                     value="domicile"
                     checked={deliveryOption === 'domicile'}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Livraison à domicile</div>
-                    <div className="text-sm text-gray-600">10€ - Livraison à l'adresse de votre choix</div>
+                    <div className="text-gray-700 text-sm">10€ - Livraison à l'adresse de votre choix</div>
                   </div>
                 </label>
 
@@ -353,38 +370,38 @@ export default function LivraisonPaiement() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white shadow-sm rounded-lg overflow-hidden mb-8"
+            className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
-            <div className="p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Mode de paiement</h2>
+            <div className="p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Mode de paiement</h2>
               <div className="space-y-4">
-                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="payment"
                     value="carte"
                     checked={paymentMethod === 'carte'}
                     onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Carte bancaire</div>
-                    <div className="text-sm text-gray-600">Paiement sécurisé par Stripe</div>
+                    <div className="text-gray-700 text-sm">Paiement sécurisé par Stripe</div>
                   </div>
                 </label>
 
-                <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="payment"
                     value="especes"
                     checked={paymentMethod === 'especes'}
                     onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Espèces</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-gray-700 text-sm">
                       {deliveryOption === 'domicile' 
                         ? 'Paiement en espèces à la livraison'
                         : 'Paiement en espèces lors du retrait'}
@@ -399,20 +416,20 @@ export default function LivraisonPaiement() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white shadow-sm rounded-lg overflow-hidden mb-8"
+            className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
-            <div className="p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Récapitulatif</h2>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+            <div className="p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Récapitulatif</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between text-sm text-gray-700 font-medium">
                   <span>Sous-total</span>
                   <span>{cart.total.toFixed(2)}€</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-700 font-medium">
                   <span>Frais de livraison</span>
                   <span>{deliveryOption === 'domicile' ? `${DELIVERY_FEE.toFixed(2)}€` : 'Gratuit'}</span>
                 </div>
-                <div className="flex justify-between text-lg font-semibold text-gray-900 pt-2 border-t">
+                <div className="flex justify-between text-lg font-bold text-gray-900 pt-4 border-t-2 border-gray-100">
                   <span>Total</span>
                   <span>{total.toFixed(2)}€</span>
                 </div>
@@ -431,11 +448,11 @@ export default function LivraisonPaiement() {
               whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`w-full sm:w-auto px-12 py-4 bg-blue-600 text-white font-semibold rounded-lg shadow-lg
+              className={`w-full sm:w-auto px-12 py-4 bg-blue-700 text-white font-semibold rounded-lg shadow-lg
                 transition-all duration-200 transform
                 ${isSubmitting 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-blue-700 hover:shadow-xl active:scale-95'}`}
+                  : 'hover:bg-blue-800 hover:shadow-xl active:scale-95'}`}
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">

@@ -4,7 +4,7 @@ import products from '@/data/products.json';
 import { OrderFormData } from '@/types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-04-30.basil',
 });
 
 export async function POST(request: Request) {
@@ -22,31 +22,38 @@ export async function POST(request: Request) {
     const deliveryFee = body.deliveryMethod === 'delivery' ? 1000 : 0; // 10€ en centimes
     const totalAmount = (unitPrice * 100 * quantity) + deliveryFee; // Conversion en centimes pour Stripe
 
+    // Création des line items
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `${product.name} - ${variant.size}`,
+            description: product.description,
+          },
+          unit_amount: unitPrice * 100, // Prix en centimes
+        },
+        quantity: quantity,
+      }
+    ];
+
+    // Ajout des frais de livraison si nécessaire
+    if (body.deliveryMethod === 'delivery') {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: 'Frais de livraison',
+          },
+          unit_amount: 1000, // 10€ en centimes
+        },
+        quantity: 1,
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `${product.name} - ${variant.size}`,
-              description: product.description,
-            },
-            unit_amount: unitPrice * 100, // Prix en centimes
-          },
-          quantity: quantity,
-        },
-        body.deliveryMethod === 'delivery' ? {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'Frais de livraison',
-            },
-            unit_amount: 1000, // 10€ en centimes
-          },
-          quantity: 1,
-        } : null,
-      ].filter(Boolean),
+      line_items: lineItems,
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?product=${body.productId}&size=${body.variantSize}`,
