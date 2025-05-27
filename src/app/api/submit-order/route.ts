@@ -1,25 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import nodemailer from 'nodemailer';
+import { transporter, verifyEmailConnection } from '@/lib/email-config';
 import { CartItem } from '@/types/cart';
 
 // Vérification des variables d'environnement requises
-const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD', 'SMTP_FROM', 'ADMIN_EMAIL'];
+const requiredEnvVars = ['SMTP_FROM', 'ADMIN_EMAIL'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
   console.error('Variables d\'environnement manquantes:', missingEnvVars);
 }
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASSWORD || '',
-  },
-});
 
 function formatCartItems(items: CartItem[]): string {
   return items.map(item => `
@@ -50,19 +40,24 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     
-    // En mode développement ou si les variables d'environnement sont manquantes,
-    // on simule juste le succès sans envoyer d'emails
-    if (process.env.NODE_ENV === 'development' || missingEnvVars.length > 0) {
-      console.log('Mode développement ou variables d\'environnement manquantes - Simulation de succès');
+    // Si les variables d'environnement sont manquantes, on ne peut pas envoyer d'emails
+    if (missingEnvVars.length > 0) {
+      console.error('Variables d\'environnement manquantes - Impossible d\'envoyer des emails');
+      console.log('Variables manquantes:', missingEnvVars);
       console.log('Données reçues:', data);
       
       return NextResponse.json({ 
-        success: true,
-        message: 'Commande enregistrée avec succès (mode développement)'
-      });
+        success: false,
+        message: 'Configuration email incomplète. Veuillez configurer les variables d\'environnement.'
+      }, { status: 500 });
     }
 
-    // En production, on envoie les emails
+    // Vérifier la connexion SMTP avant d'envoyer les emails
+    const isEmailConnected = await verifyEmailConnection();
+    if (!isEmailConnected) {
+      throw new Error('Impossible de se connecter au serveur SMTP');
+    }
+
     try {
       // Email pour l'administrateur
       await transporter.sendMail({

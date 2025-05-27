@@ -1,16 +1,6 @@
-import nodemailer from 'nodemailer';
 import { OrderFormData } from '@/types';
 import products from '@/data/products.json';
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+import { transporter } from './email-config';
 
 export async function sendOrderConfirmationEmail(orderData: OrderFormData, totalPrice: number) {
   const product = products.products.find(p => p.id === orderData.productId);
