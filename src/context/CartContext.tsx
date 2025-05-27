@@ -1,20 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Cart, CartContextType, CartItem } from '../types/cart';
+import { CartItem, CartContextType } from '@/types/cart';
 
 const MAX_QUANTITY_PER_ITEM = 3;
-const INITIAL_CART: Cart = { items: [], total: 0 };
+const INITIAL_CART: CartItem[] = [];
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<Cart>(INITIAL_CART);
+  const [items, setItems] = useState<CartItem[]>(INITIAL_CART);
+  const [total, setTotal] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialisation du panier depuis le localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
+    try {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart)) {
+          setItems(parsedCart);
+        } else {
+          setItems(INITIAL_CART);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la lecture du panier:', error);
+      setItems(INITIAL_CART);
     }
     setIsInitialized(true);
   }, []);
@@ -22,106 +33,83 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Sauvegarde du panier dans le localStorage
   useEffect(() => {
     if (isInitialized) {
-      localStorage.setItem('cart', JSON.stringify(cart));
+      try {
+        localStorage.setItem('cart', JSON.stringify(items));
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde du panier:', error);
+      }
     }
-  }, [cart, isInitialized]);
+  }, [items, isInitialized]);
+
+  useEffect(() => {
+    // Calcul du total
+    const newTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setTotal(newTotal);
+  }, [items]);
 
   const calculateTotal = (items: CartItem[]): number => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
   const isMaxQuantityReached = (productId: string, size: string): boolean => {
-    const existingItem = cart.items.find(
-      item => item.productId === productId && item.size === size
+    const existingItem = items.find(
+      item => item.id === productId && item.size === size
     );
     return existingItem ? existingItem.quantity >= MAX_QUANTITY_PER_ITEM : false;
   };
 
-  const addToCart = (product: any, size: string, quantity: number) => {
-    setCart(currentCart => {
-      const existingItemIndex = currentCart.items.findIndex(
-        item => item.productId === product.id && item.size === size
+  const addItem = (item: CartItem) => {
+    setItems(currentItems => {
+      const existingItem = currentItems.find(i => 
+        i.id === item.id && i.size === item.size
       );
 
-      let newItems: CartItem[];
-
-      if (existingItemIndex > -1) {
-        newItems = [...currentCart.items];
-        const newQuantity = Math.min(
-          newItems[existingItemIndex].quantity + quantity,
-          MAX_QUANTITY_PER_ITEM
+      if (existingItem) {
+        return currentItems.map(i =>
+          i.id === item.id && i.size === item.size
+            ? { ...i, quantity: Math.min(i.quantity + item.quantity, MAX_QUANTITY_PER_ITEM) }
+            : i
         );
-        newItems[existingItemIndex] = {
-          ...newItems[existingItemIndex],
-          quantity: newQuantity
-        };
-      } else {
-        const variant = product.variants.find((v: any) => v.size === size);
-        const newItem: CartItem = {
-          productId: product.id,
-          name: product.name,
-          size: size,
-          price: variant.price,
-          quantity: Math.min(quantity, MAX_QUANTITY_PER_ITEM),
-          image: product.image
-        };
-        newItems = [...currentCart.items, newItem];
       }
 
-      return {
-        items: newItems,
-        total: calculateTotal(newItems)
-      };
+      return [...currentItems, { ...item, quantity: Math.min(item.quantity, MAX_QUANTITY_PER_ITEM) }];
     });
   };
 
-  const removeFromCart = (productId: string, size: string) => {
-    setCart(currentCart => {
-      const newItems = currentCart.items.filter(
-        item => !(item.productId === productId && item.size === size)
-      );
-      return {
-        items: newItems,
-        total: calculateTotal(newItems)
-      };
-    });
+  const removeItem = (itemId: string, size: string) => {
+    setItems(currentItems => 
+      currentItems.filter(i => !(i.id === itemId && i.size === size))
+    );
   };
 
-  const updateQuantity = (productId: string, size: string, quantity: number) => {
+  const updateQuantity = (itemId: string, size: string, quantity: number) => {
     if (quantity > MAX_QUANTITY_PER_ITEM) return;
     
-    setCart(currentCart => {
-      const newItems = currentCart.items.map(item => {
-        if (item.productId === productId && item.size === size) {
-          return { ...item, quantity };
-        }
-        return item;
-      });
-      return {
-        items: newItems,
-        total: calculateTotal(newItems)
-      };
-    });
+    setItems(currentItems =>
+      currentItems.map(i =>
+        i.id === itemId && i.size === size
+          ? { ...i, quantity }
+          : i
+      )
+    );
   };
 
   const clearCart = () => {
-    setCart(INITIAL_CART);
+    setItems(INITIAL_CART);
   };
 
-  // Ne pas rendre le contenu tant que l'initialisation n'est pas terminée
-  if (!isInitialized) {
-    return null;
-  }
+  const value = {
+    items: items || INITIAL_CART,
+    total,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    isMaxQuantityReached
+  };
 
   return (
-    <CartContext.Provider value={{
-      cart,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      isMaxQuantityReached
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

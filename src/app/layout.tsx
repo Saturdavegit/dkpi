@@ -10,10 +10,10 @@ import { useRouter } from 'next/navigation';
 const inter = Inter({ subsets: ["latin"] });
 
 function CartButton() {
-  const { cart } = useCart();
+  const { items } = useCart();
   const router = useRouter();
 
-  const totalItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <motion.button

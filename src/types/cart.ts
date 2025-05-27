@@ -1,15 +1,10 @@
 export interface CartItem {
-  productId: string;
+  id: string;
   name: string;
   size: string;
   price: number;
   quantity: number;
   image: string;
-}
-
-export interface Cart {
-  items: CartItem[];
-  total: number;
 }
 
 export interface ContactInfo {
@@ -27,14 +22,15 @@ export interface DeliveryAddress {
 
 export interface DeliverySlot {
   date: Date;
-  timeSlot: '10h-12h' | '14h-16h' | '16h-18h';
+  timeSlot: string;
 }
 
 export interface CartContextType {
-  cart: Cart;
-  addToCart: (product: any, size: string, quantity: number) => void;
-  removeFromCart: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  items: CartItem[];
+  total: number;
+  addItem: (item: CartItem) => void;
+  removeItem: (itemId: string, size: string) => void;
+  updateQuantity: (itemId: string, size: string, quantity: number) => void;
   clearCart: () => void;
   isMaxQuantityReached: (productId: string, size: string) => boolean;
 } 

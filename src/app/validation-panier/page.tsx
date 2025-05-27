@@ -9,12 +9,12 @@ import { toast, Toaster } from 'react-hot-toast';
 import ScrollIndicator from '@/components/ScrollIndicator';
 
 export default function ValidationPanier() {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { items, total, updateQuantity, removeItem } = useCart();
   const router = useRouter();
 
-  const handleQuantityUpdate = (productId: string, size: string, newQuantity: number) => {
-    const oldQuantity = cart.items.find(item => item.productId === productId && item.size === size)?.quantity || 0;
-    updateQuantity(productId, size, newQuantity);
+  const handleQuantityUpdate = (itemId: string, size: string, newQuantity: number) => {
+    const oldQuantity = items.find(item => item.id === itemId && item.size === size)?.quantity || 0;
+    updateQuantity(itemId, size, newQuantity);
     
     if (newQuantity > oldQuantity) {
       toast.success('Quantité mise à jour', {
@@ -32,8 +32,8 @@ export default function ValidationPanier() {
     }
   };
 
-  const handleRemoveFromCart = (productId: string, size: string) => {
-    removeFromCart(productId, size);
+  const handleRemoveFromCart = (itemId: string, size: string) => {
+    removeItem(itemId, size);
     toast.error('Produit supprimé', {
       duration: 2000,
       position: 'top-center',
@@ -48,7 +48,7 @@ export default function ValidationPanier() {
     });
   };
 
-  if (cart.items.length === 0) {
+  if (items.length === 0) {
     return (
       <motion.div 
         initial={{ opacity: 0 }} 
@@ -111,9 +111,9 @@ export default function ValidationPanier() {
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Récapitulatif de votre panier</h2>
               <AnimatePresence>
                 <div className="space-y-6">
-                  {cart.items.map((item) => (
+                  {items.map((item) => (
                     <motion.div
-                      key={`${item.productId}-${item.size}`}
+                      key={`${item.id}-${item.size}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
@@ -137,7 +137,7 @@ export default function ValidationPanier() {
                           >
                             <motion.button
                               whileTap={{ scale: 0.95 }}
-                              onClick={() => handleQuantityUpdate(item.productId, item.size, Math.max(1, item.quantity - 1))}
+                              onClick={() => handleQuantityUpdate(item.id, item.size, Math.max(1, item.quantity - 1))}
                               className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors duration-200 font-medium"
                             >
                               -
@@ -147,7 +147,7 @@ export default function ValidationPanier() {
                             </span>
                             <motion.button
                               whileTap={{ scale: 0.95 }}
-                              onClick={() => handleQuantityUpdate(item.productId, item.size, Math.min(3, item.quantity + 1))}
+                              onClick={() => handleQuantityUpdate(item.id, item.size, Math.min(3, item.quantity + 1))}
                               className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={item.quantity >= 3}
                             >
@@ -157,7 +157,7 @@ export default function ValidationPanier() {
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => handleRemoveFromCart(item.productId, item.size)}
+                            onClick={() => handleRemoveFromCart(item.id, item.size)}
                             className="ml-3 text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200"
                           >
                             Supprimer
@@ -184,12 +184,12 @@ export default function ValidationPanier() {
               >
                 <span className="text-lg font-bold text-gray-900">Total</span>
                 <motion.span
-                  key={cart.total}
+                  key={total}
                   initial={{ scale: 1 }}
                   animate={{ scale: [1, 1.1, 1] }}
                   className="text-lg font-bold text-gray-900"
                 >
-                  {cart.total.toFixed(2)}€
+                  {total.toFixed(2)}€
                 </motion.span>
               </motion.div>
             </div>

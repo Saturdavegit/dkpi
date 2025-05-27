@@ -19,14 +19,23 @@ type ProductCardProps = {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [selectedSize, setSelectedSize] = useState(product.variants[0].size);
   const [quantity, setQuantity] = useState(1);
-  const { addToCart, isMaxQuantityReached } = useCart();
+  const { addItem, isMaxQuantityReached } = useCart();
 
   const selectedVariant = product.variants.find(v => v.size === selectedSize);
   const maxQuantityReached = isMaxQuantityReached(product.id, selectedSize);
 
   const handleAddToCart = () => {
     if (selectedVariant && !maxQuantityReached) {
-      addToCart(product, selectedSize, quantity);
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        size: selectedSize,
+        price: selectedVariant.price,
+        quantity: quantity,
+        image: product.image
+      };
+      
+      addItem(cartItem);
       setQuantity(1);
       toast.success(
         <div className="flex items-center gap-2">

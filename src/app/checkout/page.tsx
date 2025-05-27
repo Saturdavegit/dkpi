@@ -7,8 +7,9 @@ import OrderForm from '../components/OrderForm';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { Suspense } from 'react';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const productId = searchParams?.get('product') ?? '';
   const selectedSize = searchParams?.get('size') ?? '';
@@ -100,5 +101,13 @@ export default function CheckoutPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function Checkout() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 } 

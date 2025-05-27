@@ -11,7 +11,7 @@ import { ContactInfo, DeliveryAddress, DeliverySlot } from '@/types/cart';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { fr } from 'date-fns/locale';
-import { addDays, setHours, setMinutes } from 'date-fns';
+import { addDays } from 'date-fns';
 import ScrollIndicator from '@/components/ScrollIndicator';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from '@/components/PaymentForm';
@@ -35,7 +35,7 @@ const DELIVERY_FEE = 10;
 const TIME_SLOTS = ['10h-12h', '14h-16h', '16h-18h'] as const;
 
 export default function LivraisonPaiement() {
-  const { cart, clearCart } = useCart();
+  const { items, total: cartTotal, clearCart } = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('atelier');
@@ -57,7 +57,7 @@ export default function LivraisonPaiement() {
   });
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  const total = deliveryOption === 'domicile' ? cart.total + DELIVERY_FEE : cart.total;
+  const total = deliveryOption === 'domicile' ? cartTotal + DELIVERY_FEE : cartTotal;
 
   const minDate = addDays(new Date(), 4);
   const maxDate = addDays(new Date(), 30);
@@ -102,7 +102,6 @@ export default function LivraisonPaiement() {
   };
 
   const handleSubmit = async () => {
-    // Validation des champs
     if (!contactInfo.firstName.trim() || !contactInfo.lastName.trim() || 
         !contactInfo.email.trim() || !contactInfo.phone.trim()) {
       toast.error('Veuillez remplir tous les champs de contact');
@@ -130,6 +129,7 @@ export default function LivraisonPaiement() {
     }
 
     setIsSubmitting(true);
+
     try {
       if (paymentMethod === 'carte') {
         await createPaymentIntent();
@@ -141,7 +141,7 @@ export default function LivraisonPaiement() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            cart,
+            items,
             contactInfo,
             deliveryOption,
             deliveryAddress: deliveryOption === 'domicile' ? deliveryAddress : null,
@@ -499,7 +499,7 @@ export default function LivraisonPaiement() {
               <div className="space-y-4">
                 <div className="flex justify-between text-sm text-gray-700 font-medium">
                   <span>Sous-total</span>
-                  <span>{cart.total.toFixed(2)}€</span>
+                  <span>{cartTotal.toFixed(2)}€</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-700 font-medium">
                   <span>Frais de livraison</span>

@@ -5,10 +5,10 @@ import { CartItem } from '../types/cart';
 import { useRouter } from 'next/navigation';
 
 export const Cart: React.FC = () => {
-  const { cart, removeFromCart, updateQuantity } = useCart();
+  const { items, total, removeItem, updateQuantity } = useCart();
   const router = useRouter();
 
-  if (cart.items.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-700">Votre panier est vide</p>
@@ -20,8 +20,8 @@ export const Cart: React.FC = () => {
     <div className="p-6 bg-white">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Votre Panier</h2>
       <div className="space-y-6">
-        {cart.items.map((item: CartItem) => (
-          <div key={`${item.productId}-${item.size}`} className="flex items-center border-b border-gray-200 pb-6">
+        {items.map((item: CartItem) => (
+          <div key={`${item.id}-${item.size}`} className="flex items-center border-b border-gray-200 pb-6">
             <div className="relative w-24 h-24 mr-6">
               <Image
                 src={`https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/${item.image}`}
@@ -37,7 +37,7 @@ export const Cart: React.FC = () => {
               <div className="flex items-center">
                 <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200">
                   <button
-                    onClick={() => updateQuantity(item.productId, item.size, Math.max(1, item.quantity - 1))}
+                    onClick={() => updateQuantity(item.id, item.size, Math.max(1, item.quantity - 1))}
                     className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors"
                   >
                     -
@@ -46,7 +46,7 @@ export const Cart: React.FC = () => {
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => updateQuantity(item.productId, item.size, Math.min(3, item.quantity + 1))}
+                    onClick={() => updateQuantity(item.id, item.size, Math.min(3, item.quantity + 1))}
                     className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors disabled:bg-gray-50 disabled:text-gray-400"
                     disabled={item.quantity >= 3}
                   >
@@ -58,7 +58,7 @@ export const Cart: React.FC = () => {
             <div className="flex flex-col items-end ml-6">
               <p className="font-semibold text-gray-900 mb-3">{(item.price * item.quantity).toFixed(2)}€</p>
               <button
-                onClick={() => removeFromCart(item.productId, item.size)}
+                onClick={() => removeItem(item.id, item.size)}
                 className="text-red-600 hover:text-red-700 font-medium text-sm"
               >
                 Supprimer
@@ -68,7 +68,7 @@ export const Cart: React.FC = () => {
         ))}
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <span className="text-xl font-bold text-gray-900">Total</span>
-          <span className="text-xl font-bold text-gray-900">{cart.total.toFixed(2)}€</span>
+          <span className="text-xl font-bold text-gray-900">{total.toFixed(2)}€</span>
         </div>
         <div className="mt-6">
           <button

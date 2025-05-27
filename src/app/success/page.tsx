@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OrderFormData, OrderSummary } from '@/types';
 import products from '@/data/products.json';
 import { addDays, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -16,6 +16,8 @@ export default function SuccessPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!searchParams) return;
+    
     const orderData = searchParams.get('order');
     if (orderData) {
       try {
@@ -194,5 +196,13 @@ export default function SuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Success() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 } 
