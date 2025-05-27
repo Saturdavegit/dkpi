@@ -1,44 +1,34 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import products from '@/data/products.json';
-import { OrderFormData } from '@/types';
+import { CartItem } from '@/types/cart';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('La clé secrète Stripe n\'est pas configurée');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-04-30.basil',
 });
 
 export async function POST(request: Request) {
   try {
-    const body: OrderFormData = await request.json();
-    const product = products.products.find(p => p.id === body.productId);
-    const variant = product?.variants.find(v => v.size === body.variantSize);
+    const body = await request.json();
+    const { cart, contactInfo, deliveryOption, deliveryAddress, total } = body;
 
-    if (!product || !variant) {
-      return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
-    }
-
-    const unitPrice = variant.price;
-    const quantity = body.quantity || 1;
-    const deliveryFee = body.deliveryMethod === 'delivery' ? 1000 : 0; // 10€ en centimes
-    const totalAmount = (unitPrice * 100 * quantity) + deliveryFee; // Conversion en centimes pour Stripe
-
-    // Création des line items
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `${product.name} - ${variant.size}`,
-            description: product.description,
-          },
-          unit_amount: unitPrice * 100, // Prix en centimes
+    // Création des line items à partir du panier
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cart.items.map((item: CartItem) => ({
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: `${item.name} - ${item.size}`,
         },
-        quantity: quantity,
-      }
-    ];
+        unit_amount: Math.round(item.price * 100), // Conversion en centimes
+      },
+      quantity: item.quantity,
+    }));
 
     // Ajout des frais de livraison si nécessaire
-    if (body.deliveryMethod === 'delivery') {
+    if (deliveryOption === 'domicile') {
       lineItems.push({
         price_data: {
           currency: 'eur',
@@ -51,26 +41,30 @@ export async function POST(request: Request) {
       });
     }
 
+    // Création de la session Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?product=${body.productId}&size=${body.variantSize}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/commande-confirmee`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/livraison-paiement`,
+      customer_email: contactInfo.email,
       metadata: {
-        productId: body.productId,
-        variantSize: body.variantSize,
-        quantity: body.quantity?.toString(),
-        deliveryMethod: body.deliveryMethod,
-        name: body.name,
-        email: body.email,
-        address: body.address,
+        deliveryOption,
+        customerName: `${contactInfo.firstName} ${contactInfo.lastName}`,
+        customerPhone: contactInfo.phone,
+        deliveryAddress: deliveryOption === 'domicile' ? JSON.stringify(deliveryAddress) : '',
       },
     });
 
-    return NextResponse.json({ sessionUrl: session.url });
+    return NextResponse.json({ 
+      sessionId: session.id 
+    });
   } catch (error) {
     console.error('Erreur Stripe:', error);
-    return NextResponse.json({ error: 'Erreur lors de la création de la session de paiement' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erreur lors de la création de la session de paiement' }, 
+      { status: 500 }
+    );
   }
 } 

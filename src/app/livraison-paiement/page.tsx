@@ -13,8 +13,20 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { fr } from 'date-fns/locale';
 import { addDays, setHours, setMinutes } from 'date-fns';
 import ScrollIndicator from '@/components/ScrollIndicator';
+import { loadStripe } from '@stripe/stripe-js';
+import { PaymentForm } from '@/components/PaymentForm';
 
 registerLocale('fr', fr);
+
+// Vérification de la clé publique Stripe
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+  console.error('La clé publique Stripe n\'est pas configurée');
+}
+
+// Initialisation de Stripe avec vérification
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
+  : null;
 
 type DeliveryOption = 'atelier' | 'bureau' | 'domicile';
 type PaymentMethod = 'carte' | 'especes';
@@ -27,7 +39,7 @@ export default function LivraisonPaiement() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('atelier');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('carte');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('especes');
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     firstName: '',
     lastName: '',
@@ -43,11 +55,51 @@ export default function LivraisonPaiement() {
     date: addDays(new Date(), 4),
     timeSlot: '10h-12h'
   });
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const total = deliveryOption === 'domicile' ? cart.total + DELIVERY_FEE : cart.total;
 
   const minDate = addDays(new Date(), 4);
   const maxDate = addDays(new Date(), 30);
+
+  const createPaymentIntent = async () => {
+    try {
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          total,
+          metadata: {
+            deliveryOption,
+            customerName: `${contactInfo.firstName} ${contactInfo.lastName}`,
+            customerEmail: contactInfo.email,
+            customerPhone: contactInfo.phone,
+            deliveryAddress: deliveryOption === 'domicile' ? JSON.stringify(deliveryAddress) : '',
+            deliverySlot: deliveryOption === 'domicile' ? JSON.stringify(deliverySlot) : '',
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setClientSecret(data.clientSecret);
+    } catch (error) {
+      console.error('Erreur:', error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Une erreur est survenue lors de l\'initialisation du paiement.');
+      }
+      // En cas d'erreur, revenir au paiement en espèces
+      setPaymentMethod('especes');
+    }
+  };
 
   const handleSubmit = async () => {
     // Validation des champs
@@ -80,7 +132,7 @@ export default function LivraisonPaiement() {
     setIsSubmitting(true);
     try {
       if (paymentMethod === 'carte') {
-        router.push('/paiement');
+        await createPaymentIntent();
       } else {
         // Pour le paiement en espèces
         const response = await fetch('/api/submit-order', {
@@ -108,23 +160,28 @@ export default function LivraisonPaiement() {
         // Si tout est OK, on vide le panier
         clearCart();
         
-        // Redirection vers la page de confirmation avec un délai pour s'assurer que le panier est vidé
-        setTimeout(() => {
-          router.push('/commande-confirmee');
-        }, 100);
+        // Redirection vers la page de confirmation
+        router.push('/commande-confirmee');
       }
     } catch (error) {
       console.error('Erreur:', error);
-      
-      // Affichage d'un message d'erreur plus détaillé
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
-        toast.error('Une erreur inattendue est survenue. Veuillez réessayer ou nous contacter si le problème persiste.');
+        toast.error('Une erreur est survenue lors du traitement de votre commande.');
       }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    clearCart();
+    router.push('/commande-confirmee');
+  };
+
+  const handlePaymentError = (error: string) => {
+    toast.error(error);
   };
 
   return (
@@ -216,7 +273,7 @@ export default function LivraisonPaiement() {
                     defaultCountry="FR"
                     value={contactInfo.phone}
                     onChange={(value) => setContactInfo({ ...contactInfo, phone: value || '' })}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200"
+                    className="w-full bg-white"
                   />
                 </div>
               </div>
@@ -379,24 +436,12 @@ export default function LivraisonPaiement() {
                   <input
                     type="radio"
                     name="payment"
-                    value="carte"
-                    checked={paymentMethod === 'carte'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
-                  />
-                  <div className="ml-4">
-                    <div className="font-medium text-gray-900">Carte bancaire</div>
-                    <div className="text-gray-700 text-sm">Paiement sécurisé par Stripe</div>
-                  </div>
-                </label>
-
-                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
                     value="especes"
                     checked={paymentMethod === 'especes'}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                    onChange={(e) => {
+                      setPaymentMethod(e.target.value as PaymentMethod);
+                      setClientSecret(null);
+                    }}
                     className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
@@ -408,6 +453,37 @@ export default function LivraisonPaiement() {
                     </div>
                   </div>
                 </label>
+
+                <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="carte"
+                    checked={paymentMethod === 'carte'}
+                    onChange={async (e) => {
+                      setPaymentMethod(e.target.value as PaymentMethod);
+                      setClientSecret(null);
+                      if (e.target.value === 'carte') {
+                        await createPaymentIntent();
+                      }
+                    }}
+                    className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
+                  />
+                  <div className="ml-4">
+                    <div className="font-medium text-gray-900">Carte bancaire</div>
+                    <div className="text-gray-700 text-sm">Paiement sécurisé par Stripe</div>
+                  </div>
+                </label>
+
+                {paymentMethod === 'carte' && clientSecret && (
+                  <div className="mt-6">
+                    <PaymentForm
+                      clientSecret={clientSecret}
+                      onSuccess={handlePaymentSuccess}
+                      onError={handlePaymentError}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -438,33 +514,35 @@ export default function LivraisonPaiement() {
           </motion.div>
 
           {/* Bouton de validation */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center"
-          >
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`w-full sm:w-auto px-12 py-4 bg-blue-700 text-white font-semibold rounded-lg shadow-lg
-                transition-all duration-200 transform
-                ${isSubmitting 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-blue-800 hover:shadow-xl active:scale-95'}`}
+          {!(paymentMethod === 'carte' && clientSecret) && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-center"
             >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Validation en cours...
-                </span>
-              ) : 'Confirmer la commande'}
-            </motion.button>
-          </motion.div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`w-full sm:w-auto px-12 py-4 bg-blue-700 text-white font-semibold rounded-lg shadow-lg
+                  transition-all duration-200 transform
+                  ${isSubmitting 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-blue-800 hover:shadow-xl active:scale-95'}`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Validation en cours...
+                  </span>
+                ) : 'Confirmer la commande'}
+              </motion.button>
+            </motion.div>
+          )}
         </div>
       </motion.div>
 

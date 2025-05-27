@@ -60,17 +60,25 @@ select::placeholder {
 
 /* Styles personnalisés pour react-phone-number-input */
 .PhoneInput {
-  display: flex;
-  align-items: center;
+  /* Style du conteneur */
   background-color: white;
   border-radius: 0.5rem;
-  border: 2px solid var(--border-color);
-  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
 }
 
-.PhoneInput:focus-within {
-  border-color: var(--focus-ring);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, var(--focus-ring-opacity));
+.PhoneInputInput {
+  /* Style du champ de saisie */
+  border: none !important;
+  outline: none !important;
+  padding: 0.75rem !important;
+  border-radius: 0.5rem !important;
+  width: 100% !important;
+  color: #1f2937 !important;
+}
+
+.PhoneInputInput:focus {
+  /* Style au focus */
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
 }
 
 .PhoneInputCountry {
@@ -92,15 +100,6 @@ select::placeholder {
   width: 1.5rem;
   height: 1.5rem;
   margin-right: 0.5rem;
-}
-
-.PhoneInputInput {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 0.875rem;
-  color: var(--input-text);
-  background: transparent;
 }
 
 .PhoneInputInput::placeholder {
