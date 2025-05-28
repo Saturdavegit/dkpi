@@ -1,3 +1,5 @@
+'use client';
+
 import CookieConsent from 'react-cookie-consent';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
