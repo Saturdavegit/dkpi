@@ -6,6 +6,7 @@ import { CartProvider } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
+import CookieConsentBanner from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -56,6 +57,7 @@ export default function RootLayout({
             {children}
           </div>
         </CartProvider>
+        <CookieConsentBanner />
       </body>
     </html>
   );

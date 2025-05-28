@@ -40,6 +40,20 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     
+    // Log des données reçues pour le débogage
+    console.log('Données reçues:', JSON.stringify(data, null, 2));
+    
+    // Vérification de la structure des données
+    if (!data.cart || !Array.isArray(data.cart.items)) {
+      console.error('Structure de données invalide:', {
+        hasCart: !!data.cart,
+        cartType: data.cart ? typeof data.cart : 'undefined',
+        hasItems: data.cart ? !!data.cart.items : false,
+        itemsType: data.cart && data.cart.items ? typeof data.cart.items : 'undefined'
+      });
+      throw new Error('Structure de données invalide: cart.items doit être un tableau');
+    }
+
     // Si les variables d'environnement sont manquantes, on ne peut pas envoyer d'emails
     if (missingEnvVars.length > 0) {
       console.error('Variables d\'environnement manquantes - Impossible d\'envoyer des emails');

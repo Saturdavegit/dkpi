@@ -141,7 +141,10 @@ export default function LivraisonPaiement() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            items,
+            cart: {
+              items,
+              total: cartTotal
+            },
             contactInfo,
             deliveryOption,
             deliveryAddress: deliveryOption === 'domicile' ? deliveryAddress : null,
