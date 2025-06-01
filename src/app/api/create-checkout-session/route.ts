@@ -13,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { cart, contactInfo, deliveryOption, deliveryAddress, total } = body;
+    const { cart, contactInfo, deliveryOption, deliveryAddress,} = body;
 
     // Création des line items à partir du panier
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cart.items.map((item: CartItem) => ({

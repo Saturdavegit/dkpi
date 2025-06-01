@@ -3,8 +3,7 @@
 import { Product } from '@/types';
 import products from '@/data/products.json';
 import { ProductCard } from '@/components/ProductCard';
-import { useState } from 'react';
-import { useCart } from '@/context/CartContext';
+
 
 export default function Home() {
   return (

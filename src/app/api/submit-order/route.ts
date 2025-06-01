@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { transporter, verifyEmailConnection } from '@/lib/email-config';
-import { CartItem } from '@/types/cart';
+import { CartItem, ContactInfo, DeliveryAddress, DeliverySlot } from '@/types/cart';
 
 // Vérification des variables d'environnement requises
 const requiredEnvVars = ['SMTP_FROM', 'ADMIN_EMAIL'];
@@ -9,6 +9,19 @@ const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
   console.error('Variables d\'environnement manquantes:', missingEnvVars);
+}
+
+interface OrderData {
+  deliveryOption: 'atelier' | 'bureau' | 'domicile';
+  deliveryAddress: DeliveryAddress | null;
+  deliverySlot: DeliverySlot | null;
+  contactInfo: ContactInfo;
+  paymentMethod: 'carte' | 'especes';
+  cart: {
+    items: CartItem[];
+    total: number;
+  };
+  total: number;
 }
 
 function formatCartItems(items: CartItem[]): string {
@@ -20,11 +33,11 @@ function formatCartItems(items: CartItem[]): string {
   `).join('\n');
 }
 
-function formatDeliveryInfo(data: any): string {
+function formatDeliveryInfo(data: OrderData): string {
   let deliveryInfo = `Mode de livraison : ${data.deliveryOption === 'atelier' ? 'Retrait à l\'atelier' : 
     data.deliveryOption === 'bureau' ? 'Retrait au bureau de Levallois' : 'Livraison à domicile'}`;
 
-  if (data.deliveryOption === 'domicile') {
+  if (data.deliveryOption === 'domicile' && data.deliveryAddress && data.deliverySlot) {
     deliveryInfo += `
     Adresse : ${data.deliveryAddress.address}
     Code postal : ${data.deliveryAddress.zipCode}

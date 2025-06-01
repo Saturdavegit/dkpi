@@ -31,7 +31,7 @@ export default function CommandeConfirmee() {
               transition={{ delay: 0.2 }}
               className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4"
             >
-              Commande validée !
+              Commande validée&nbsp;!
             </motion.h1>
 
             <motion.p
@@ -49,7 +49,7 @@ export default function CommandeConfirmee() {
               transition={{ delay: 0.4 }}
               className="text-gray-700 text-lg mb-8"
             >
-              Merci d'avoir commandé chez nous, gros bolos
+              Merci d&apos;avoir commandé chez nous, gros bolos
             </motion.p>
 
             <motion.button
@@ -66,4 +66,4 @@ export default function CommandeConfirmee() {
       </motion.div>
     </div>
   );
-} 
+}

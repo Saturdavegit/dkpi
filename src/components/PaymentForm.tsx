@@ -17,7 +17,7 @@ interface PaymentFormProps {
   onError: (error: string) => void;
 }
 
-const PaymentFormContent = ({ clientSecret, onSuccess, onError }: PaymentFormProps) => {
+const PaymentFormContent = ({onSuccess, onError }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,9 +42,7 @@ const PaymentFormContent = ({ clientSecret, onSuccess, onError }: PaymentFormPro
       } else if (paymentIntent.status === 'succeeded') {
         onSuccess();
       }
-    } catch (err) {
-      onError('Une erreur inattendue est survenue.');
-    } finally {
+    }  finally {
       setIsProcessing(false);
     }
   };

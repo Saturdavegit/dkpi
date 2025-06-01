@@ -49,9 +49,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTotal(newTotal);
   }, [items]);
 
-  const calculateTotal = (items: CartItem[]): number => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
 
   const isMaxQuantityReached = (productId: string, size: string): boolean => {
     const existingItem = items.find(

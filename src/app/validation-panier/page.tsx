@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -121,7 +120,7 @@ export default function ValidationPanier() {
                     >
                       <div className="relative w-16 h-16 sm:w-20 sm:h-20 mr-3 sm:mr-4 flex-shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
                         <Image
-                          src={`https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/${item.image}`}
+                          src="/kefir.jpeg"
                           alt={item.name}
                           fill
                           className="object-cover transform transition-transform duration-300 group-hover:scale-105"

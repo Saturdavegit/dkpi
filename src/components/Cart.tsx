@@ -24,10 +24,10 @@ export const Cart: React.FC = () => {
           <div key={`${item.id}-${item.size}`} className="flex items-center border-b border-gray-200 pb-6">
             <div className="relative w-24 h-24 mr-6">
               <Image
-                src={`https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/${item.image}`}
+                src="/kefir.jpeg"
                 alt={item.name}
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             <div className="flex-grow">

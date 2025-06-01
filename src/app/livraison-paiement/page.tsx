@@ -13,20 +13,16 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { fr } from 'date-fns/locale';
 import { addDays } from 'date-fns';
 import ScrollIndicator from '@/components/ScrollIndicator';
-import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from '@/components/PaymentForm';
 
 registerLocale('fr', fr);
 
 // Vérification de la clé publique Stripe
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+if (!process.env.NEXT_PUBLIC_STRIPE_KEY) {
   console.error('La clé publique Stripe n\'est pas configurée');
 }
 
-// Initialisation de Stripe avec vérification
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY 
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
-  : null;
+
 
 type DeliveryOption = 'atelier' | 'bureau' | 'domicile';
 type PaymentMethod = 'carte' | 'especes';
@@ -301,10 +297,10 @@ export default function LivraisonPaiement() {
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
                     className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
-                  <div className="ml-4">
-                    <div className="font-medium text-gray-900">Retrait à l'atelier</div>
-                    <div className="text-gray-700 text-sm">Gratuit - Retrait à l'atelier de Claire</div>
-                  </div>
+        <div className="ml-4">
+          <div className="font-medium text-gray-900">Retrait à l&apos;atelier</div>
+          <div className="text-gray-700 text-sm">Gratuit - Retrait à l&apos;atelier de Claire</div>
+        </div>
                 </label>
 
                 <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
@@ -333,8 +329,8 @@ export default function LivraisonPaiement() {
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Livraison à domicile</div>
-                    <div className="text-gray-700 text-sm">10€ - Livraison à l'adresse de votre choix</div>
-                  </div>
+                    <div className="text-gray-700 text-sm">10€ - Livraison à l&apos;adresse de votre choix</div>
+                    </div>
                 </label>
 
                 {deliveryOption === 'domicile' && (

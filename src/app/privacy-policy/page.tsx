@@ -10,7 +10,7 @@ export default function PrivacyPolicy() {
         </p>
         <ul className="list-disc pl-6 mb-4">
           <li className="mb-2">
-            <strong>Cookies essentiels :</strong> Nécessaires au fonctionnement du site (session utilisateur, panier d'achat, authentification).
+            <strong>Cookies essentiels :</strong> Nécessaires au fonctionnement du site (session utilisateur, panier d&apos;achat, authentification).
           </li>
           <li className="mb-2">
             <strong>Cookies tiers :</strong> Utilisés par Stripe pour le traitement sécurisé des paiements.
@@ -36,9 +36,9 @@ export default function PrivacyPolicy() {
           Conformément au RGPD, vous disposez des droits suivants :
         </p>
         <ul className="list-disc pl-6 mb-4">
-          <li className="mb-2">Droit d'accès à vos données</li>
+          <li className="mb-2">Droit d&apos;accès à vos données</li>
           <li className="mb-2">Droit de rectification</li>
-          <li className="mb-2">Droit à l'effacement</li>
+          <li className="mb-2">Droit à l&apos;effacement</li>
           <li className="mb-2">Droit à la portabilité des données</li>
         </ul>
       </section>
@@ -52,4 +52,4 @@ export default function PrivacyPolicy() {
       </section>
     </div>
   );
-} 
+}

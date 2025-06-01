@@ -69,13 +69,14 @@ export default function CookieConsentBanner() {
         padding: '10px 20px',
         borderRadius: '4px'
       }}
-    >
-      Bonjour ! 👋 Pour vous offrir une expérience de paiement sécurisée, nous utilisons des cookies essentiels et des cookies tiers (Stripe) pour le traitement des paiements par carte bancaire. 
-      Si vous refusez les cookies, le paiement par carte ne sera pas disponible. 
-      Pour plus d'informations, consultez notre{' '}
-      <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300">
-        politique de confidentialité
-      </Link>.
-    </CookieConsent>
+>
+  Bonjour&nbsp;! 👋 Pour vous offrir une expérience de paiement sécurisée, nous utilisons des cookies essentiels et des cookies tiers (Stripe) pour le traitement des paiements par carte bancaire.&nbsp;
+  Si vous refusez les cookies, le paiement par carte ne sera pas disponible.&nbsp;
+  Pour plus d&apos;informations, consultez notre{' '}
+  <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300">
+    politique de confidentialité
+  </Link>.
+</CookieConsent>
+
   );
 } 

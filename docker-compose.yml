@@ -1,0 +1,30 @@
+services:
+  app:
+    image: dkpi:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    restart: unless-stopped
+    volumes:
+      - /share/Container/dkpilite/data:/app/data
+      - /share/Container/dkpilite/public:/app/public
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel --no-autoupdate run --token "eyJhIjoiOTMyZTY5MzRjNzdlYmY5ZmNhNjE2ZDNkYTk2NTQwN2IiLCJ0IjoiODhjMmFjMWMtODY2MC00OTY3LWJlNmMtYmViNzM2NGJlMWNkIiwicyI6Ik1qbGtNVE00TUdNdE1XVTBOUzAwWXpZMExUZ3lOalV0TVdNMFlqZzBOMkkxWlRVMyJ9"
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

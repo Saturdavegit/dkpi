@@ -61,10 +61,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
       <div className="relative h-56">
         <Image
-          src={`https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/${product.image}`}
+          src="/kefir.jpeg"
           alt={product.name}
           fill
-          className="object-cover"
+          className="object-cover transform transition-transform duration-300 group-hover:scale-105"
         />
       </div>
       <div className="p-6">

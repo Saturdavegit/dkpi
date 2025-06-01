@@ -29,7 +29,7 @@ function CheckoutContent() {
             Produit non trouvé
           </h1>
           <p className="text-gray-600 mb-6">
-            Le produit que vous recherchez n'est pas disponible.
+            Le produit que vous recherchez n&apos;est pas disponible.
           </p>
           <Link
             href="/"
@@ -74,10 +74,10 @@ function CheckoutContent() {
               <div className="flex items-start space-x-6">
                 <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200">
                   <Image
-                    src={`https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/${product.image}`}
+                    src="/kefir.jpeg"
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-cover transform transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <div className="flex-grow">
@@ -110,4 +110,4 @@ export default function Checkout() {
       <CheckoutContent />
     </Suspense>
   );
-} 
+}
