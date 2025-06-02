@@ -8,8 +8,8 @@ import Providers from "@/components/Providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DKPILite",
-  description: "DKPILite - Votre solution de gestion de DKP",
+  title: "Du k\u00E9fir by Claire",
+  description: "Du k\u00E9fir by Claire - K\u00E9fir artisanal fait avec amour",
 };
 
 export default function RootLayout({

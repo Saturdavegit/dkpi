@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useCart } from '../context/CartContext';
 import { toast, Toaster } from 'react-hot-toast';
+import { getProductImageUrl } from '@/lib/utils';
 
 type ProductCardProps = {
   product: {
@@ -61,10 +62,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
       <div className="relative h-56">
         <Image
-          src="/kefir.jpeg"
+          src={getProductImageUrl(product.image)}
           alt={product.name}
           fill
           className="object-cover transform transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            console.error('Image loading error:', e);
+            console.log('Attempted URL:', getProductImageUrl(product.image));
+          }}
         />
       </div>
       <div className="p-6">

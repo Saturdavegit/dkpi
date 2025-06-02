@@ -93,8 +93,7 @@ export const PaymentForm = ({ clientSecret, onSuccess, onError }: PaymentFormPro
     return (
       <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-yellow-800">
-          Pour utiliser le paiement par carte, vous devez accepter les cookies tiers (Stripe).
-          Veuillez accepter les cookies dans la bannière en bas de la page.
+          Pour utiliser le paiement par carte, tu dois accepter les cookies tiers !.
         </p>
       </div>
     );

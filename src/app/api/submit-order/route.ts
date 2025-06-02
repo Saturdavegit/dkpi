@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: process.env.ADMIN_EMAIL,
-        subject: 'Nouvelle commande - Du kéfir pour Inès',
+        subject: 'Nouvelle commande - Du kéfir by Claire',
         text: `
 Nouvelle commande reçue !
 
@@ -116,30 +116,29 @@ Total : ${data.total.toFixed(2)}€
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: data.contactInfo.email,
-        subject: 'Confirmation de commande - Du kéfir pour Inès',
+        subject: 'Ta commande est confirmée ! 🎉',
         text: `
-Bonjour ${data.contactInfo.firstName},
+Hello ${data.contactInfo.firstName},
 
-Nous avons bien reçu votre commande et nous vous en remercions !
+J'ai bien reçu ta commande et je suis ravie de te préparer ton kéfir.
 
-Récapitulatif de votre commande :
+Petit recap :
 ${formatCartItems(data.cart.items)}
 
 ${formatDeliveryInfo(data)}
 
 Mode de paiement : ${data.paymentMethod === 'carte' ? 'Carte bancaire' : 'Espèces'}
-
 Sous-total : ${data.cart.total.toFixed(2)}€
 ${data.deliveryOption === 'domicile' ? `Frais de livraison : 10.00€` : ''}
 Total : ${data.total.toFixed(2)}€
 
 ${data.paymentMethod === 'especes' ? 
-  `N'oubliez pas de prévoir le paiement en espèces lors du ${data.deliveryOption === 'domicile' ? 'de la livraison' : 'retrait'}.` : ''}
+  `N'oublie pas de prévoir le paiement en espèces lors du ${data.deliveryOption === 'domicile' ? 'de la livraison' : 'retrait'}.` : ''}
 
-Pour toute question, n'hésitez pas à nous contacter.
+Si tu as la moindre question, n'hésite pas à me contacter.
 
-À bientôt !
-L'équipe Du kéfir pour Inès
+À très vite !
+Claire 🌱
         `,
       });
     } catch (emailError) {

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Suspense } from 'react';
+import { getProductImageUrl } from '@/lib/utils';
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -74,7 +75,7 @@ function CheckoutContent() {
               <div className="flex items-start space-x-6">
                 <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200">
                   <Image
-                    src="/kefir.jpeg"
+                    src={getProductImageUrl(product.image)}
                     alt={product.name}
                     fill
                     className="object-cover transform transition-transform duration-300 group-hover:scale-105"

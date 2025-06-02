@@ -23,20 +23,42 @@ if (!process.env.NEXT_PUBLIC_STRIPE_KEY) {
   console.error('La clé publique Stripe n\'est pas configurée');
 }
 
-
-
 type DeliveryOption = 'atelier' | 'bureau' | 'domicile';
 type PaymentMethod = 'carte' | 'especes';
 
 const DELIVERY_FEE = 10;
 const TIME_SLOTS = ['10h-12h', '14h-16h', '16h-18h'] as const;
 
+// Constantes pour les messages d'erreur
+const ERROR_MESSAGES = {
+  CONTACT_FIELDS: 'Remplis bien tous les champs de contact',
+  INVALID_EMAIL: 'Ton adresse email est invalide',
+  INCOMPLETE_ADDRESS: 'Ton adresse est incomplète',
+  MISSING_DELIVERY_SLOT: 'Il faut que tu sélectionnes un créneau de livraison',
+  ORDER_VALIDATION: 'Impossible de valider ta commande, vérifie tes infos',
+  GENERIC_ERROR: 'Oups ! Une erreur est survenue, réessaie dans quelques instants',
+  PAYMENT_FAILED: 'Le paiement a échoué, vérifie les infos de ta carte'
+} as const;
+
+// Constantes pour les options de livraison
+const DELIVERY_OPTIONS = {
+  ATELIER: 'atelier',
+  BUREAU: 'bureau',
+  DOMICILE: 'domicile'
+} as const;
+
+// Constantes pour les modes de paiement
+const PAYMENT_METHODS = {
+  ESPECES: 'especes',
+  CARTE: 'carte'
+} as const;
+
 export default function LivraisonPaiement() {
   const { items, total: cartTotal, clearCart } = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('atelier');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('especes');
+  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>(DELIVERY_OPTIONS.ATELIER);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS.ESPECES);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     firstName: '',
     lastName: '',
@@ -50,11 +72,11 @@ export default function LivraisonPaiement() {
   });
   const [deliverySlot, setDeliverySlot] = useState<DeliverySlot>({
     date: addDays(new Date(), 4),
-    timeSlot: '10h-12h'
+    timeSlot: TIME_SLOTS[0]
   });
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  const total = deliveryOption === 'domicile' ? cartTotal + DELIVERY_FEE : cartTotal;
+  const total = deliveryOption === DELIVERY_OPTIONS.DOMICILE ? cartTotal + DELIVERY_FEE : cartTotal;
 
   const minDate = addDays(new Date(), 4);
   const maxDate = addDays(new Date(), 30);
@@ -73,8 +95,8 @@ export default function LivraisonPaiement() {
             customerName: `${contactInfo.firstName} ${contactInfo.lastName}`,
             customerEmail: contactInfo.email,
             customerPhone: contactInfo.phone,
-            deliveryAddress: deliveryOption === 'domicile' ? JSON.stringify(deliveryAddress) : '',
-            deliverySlot: deliveryOption === 'domicile' ? JSON.stringify(deliverySlot) : '',
+            deliveryAddress: deliveryOption === DELIVERY_OPTIONS.DOMICILE ? JSON.stringify(deliveryAddress) : '',
+            deliverySlot: deliveryOption === DELIVERY_OPTIONS.DOMICILE ? JSON.stringify(deliverySlot) : '',
           },
         }),
       });
@@ -89,44 +111,52 @@ export default function LivraisonPaiement() {
     } catch (error) {
       handleStripeError(error as Error);
       // En cas d'erreur, revenir au paiement en espèces
-      setPaymentMethod('especes');
+      setPaymentMethod(PAYMENT_METHODS.ESPECES);
     }
   };
 
-  const handleSubmit = async () => {
+  const validateContactInfo = () => {
     if (!contactInfo.firstName.trim() || !contactInfo.lastName.trim() || 
         !contactInfo.email.trim() || !contactInfo.phone.trim()) {
-      toast.error('Veuillez remplir tous les champs de contact');
-      return;
+      toast.error(ERROR_MESSAGES.CONTACT_FIELDS);
+      return false;
     }
 
-    // Validation basique de l'email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(contactInfo.email)) {
-      toast.error('Veuillez entrer une adresse email valide');
-      return;
+      toast.error(ERROR_MESSAGES.INVALID_EMAIL);
+      return false;
     }
 
-    // Validation de l'adresse pour la livraison à domicile
-    if (deliveryOption === 'domicile') {
+    return true;
+  };
+
+  const validateDeliveryInfo = () => {
+    if (deliveryOption === DELIVERY_OPTIONS.DOMICILE) {
       if (!deliveryAddress.address.trim() || !deliveryAddress.city.trim() || !deliveryAddress.zipCode.trim()) {
-        toast.error('Veuillez remplir tous les champs de l\'adresse');
-        return;
+        toast.error(ERROR_MESSAGES.INCOMPLETE_ADDRESS);
+        return false;
       }
 
       if (!deliverySlot.date || !deliverySlot.timeSlot) {
-        toast.error('Veuillez sélectionner un créneau de livraison');
-        return;
+        toast.error(ERROR_MESSAGES.MISSING_DELIVERY_SLOT);
+        return false;
       }
+    }
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateContactInfo() || !validateDeliveryInfo()) {
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      if (paymentMethod === 'carte') {
+      if (paymentMethod === PAYMENT_METHODS.CARTE) {
         await createPaymentIntent();
       } else {
-        // Pour le paiement en espèces
         const response = await fetch('/api/submit-order', {
           method: 'POST',
           headers: {
@@ -139,8 +169,8 @@ export default function LivraisonPaiement() {
             },
             contactInfo,
             deliveryOption,
-            deliveryAddress: deliveryOption === 'domicile' ? deliveryAddress : null,
-            deliverySlot: deliveryOption === 'domicile' ? deliverySlot : null,
+            deliveryAddress: deliveryOption === DELIVERY_OPTIONS.DOMICILE ? deliveryAddress : null,
+            deliverySlot: deliveryOption === DELIVERY_OPTIONS.DOMICILE ? deliverySlot : null,
             paymentMethod,
             total,
           }),
@@ -149,13 +179,10 @@ export default function LivraisonPaiement() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Erreur lors de la soumission de la commande');
+          throw new Error(data.message || ERROR_MESSAGES.ORDER_VALIDATION);
         }
 
-        // Si tout est OK, on vide le panier
         clearCart();
-        
-        // Redirection vers la page de confirmation
         router.push('/commande-confirmee');
       }
     } catch (error) {
@@ -163,7 +190,7 @@ export default function LivraisonPaiement() {
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
-        toast.error('Une erreur est survenue lors du traitement de votre commande.');
+        toast.error(ERROR_MESSAGES.GENERIC_ERROR);
       }
     } finally {
       setIsSubmitting(false);
@@ -176,7 +203,7 @@ export default function LivraisonPaiement() {
   };
 
   const handlePaymentError = (error: string) => {
-    toast.error(error);
+    toast.error(ERROR_MESSAGES.PAYMENT_FAILED);
   };
 
   return (
@@ -201,14 +228,6 @@ export default function LivraisonPaiement() {
             <span className="sm:hidden">Retour</span>
           </motion.button>
 
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8"
-          >
-            Livraison et Paiement
-          </motion.h1>
-
           {/* Informations personnelles */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -216,7 +235,7 @@ export default function LivraisonPaiement() {
             className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
             <div className="p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Vos informations</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Tes infos :</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -229,7 +248,7 @@ export default function LivraisonPaiement() {
                       value={contactInfo.firstName}
                       onChange={(e) => setContactInfo({ ...contactInfo, firstName: e.target.value })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 text-gray-900"
-                      placeholder="Votre prénom"
+                      placeholder="prénom"
                     />
                   </div>
                   <div>
@@ -242,7 +261,7 @@ export default function LivraisonPaiement() {
                       value={contactInfo.lastName}
                       onChange={(e) => setContactInfo({ ...contactInfo, lastName: e.target.value })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 text-gray-900"
-                      placeholder="Votre nom"
+                      placeholder="nom"
                     />
                   </div>
                 </div>
@@ -256,7 +275,7 @@ export default function LivraisonPaiement() {
                     value={contactInfo.email}
                     onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 text-gray-900"
-                    placeholder="votre@email.com"
+                    placeholder="ton@email.com"
                   />
                 </div>
                 <div>
@@ -282,14 +301,14 @@ export default function LivraisonPaiement() {
             className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
             <div className="p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Mode de livraison</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Où récupérer ta commande ?              </h2>
               <div className="space-y-4">
                 <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"
                     name="delivery"
                     value="atelier"
-                    checked={deliveryOption === 'atelier'}
+                    checked={deliveryOption === DELIVERY_OPTIONS.ATELIER}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
                     className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
@@ -304,7 +323,7 @@ export default function LivraisonPaiement() {
                     type="radio"
                     name="delivery"
                     value="bureau"
-                    checked={deliveryOption === 'bureau'}
+                    checked={deliveryOption === DELIVERY_OPTIONS.BUREAU}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
                     className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
@@ -319,17 +338,17 @@ export default function LivraisonPaiement() {
                     type="radio"
                     name="delivery"
                     value="domicile"
-                    checked={deliveryOption === 'domicile'}
+                    checked={deliveryOption === DELIVERY_OPTIONS.DOMICILE}
                     onChange={(e) => setDeliveryOption(e.target.value as DeliveryOption)}
                     className="h-4 w-4 text-blue-700 border-2 border-gray-300 focus:ring-blue-700"
                   />
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Livraison à domicile</div>
-                    <div className="text-gray-700 text-sm">10€ - Livraison à l&apos;adresse de votre choix</div>
+                    <div className="text-gray-700 text-sm">10€ - Livraison à l&apos;adresse de ton choix</div>
                     </div>
                 </label>
 
-                {deliveryOption === 'domicile' && (
+                {deliveryOption === DELIVERY_OPTIONS.DOMICILE && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -432,7 +451,7 @@ export default function LivraisonPaiement() {
                     type="radio"
                     name="payment"
                     value="especes"
-                    checked={paymentMethod === 'especes'}
+                    checked={paymentMethod === PAYMENT_METHODS.ESPECES}
                     onChange={(e) => {
                       setPaymentMethod(e.target.value as PaymentMethod);
                       setClientSecret(null);
@@ -442,7 +461,7 @@ export default function LivraisonPaiement() {
                   <div className="ml-4">
                     <div className="font-medium text-gray-900">Espèces</div>
                     <div className="text-gray-700 text-sm">
-                      {deliveryOption === 'domicile' 
+                      {deliveryOption === DELIVERY_OPTIONS.DOMICILE 
                         ? 'Paiement en espèces à la livraison'
                         : 'Paiement en espèces lors du retrait'}
                     </div>
@@ -454,11 +473,11 @@ export default function LivraisonPaiement() {
                     type="radio"
                     name="payment"
                     value="carte"
-                    checked={paymentMethod === 'carte'}
+                    checked={paymentMethod === PAYMENT_METHODS.CARTE}
                     onChange={async (e) => {
                       setPaymentMethod(e.target.value as PaymentMethod);
                       setClientSecret(null);
-                      if (e.target.value === 'carte') {
+                      if (e.target.value === PAYMENT_METHODS.CARTE) {
                         await createPaymentIntent();
                       }
                     }}
@@ -470,7 +489,7 @@ export default function LivraisonPaiement() {
                   </div>
                 </label>
 
-                {paymentMethod === 'carte' && clientSecret && (
+                {paymentMethod === PAYMENT_METHODS.CARTE && clientSecret && (
                   <div className="mt-6">
                     <PaymentForm
                       clientSecret={clientSecret}
@@ -498,7 +517,7 @@ export default function LivraisonPaiement() {
                 </div>
                 <div className="flex justify-between text-sm text-gray-700 font-medium">
                   <span>Frais de livraison</span>
-                  <span>{deliveryOption === 'domicile' ? `${DELIVERY_FEE.toFixed(2)}€` : 'Gratuit'}</span>
+                  <span>{deliveryOption === DELIVERY_OPTIONS.DOMICILE ? `${DELIVERY_FEE.toFixed(2)}€` : 'Gratuit'}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900 pt-4 border-t-2 border-gray-100">
                   <span>Total</span>
@@ -509,7 +528,7 @@ export default function LivraisonPaiement() {
           </motion.div>
 
           {/* Bouton de validation */}
-          {!(paymentMethod === 'carte' && clientSecret) && (
+          {!(paymentMethod === PAYMENT_METHODS.CARTE && clientSecret) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -534,7 +553,7 @@ export default function LivraisonPaiement() {
                     </svg>
                     Validation en cours...
                   </span>
-                ) : 'Confirmer la commande'}
+                ) : 'Valider ma commande'}
               </motion.button>
             </motion.div>
           )}

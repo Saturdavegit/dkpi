@@ -3,7 +3,7 @@
     {
       "id": "kefir-gingembre",
       "name": "Kéfir Gingembre",
-      "description": "L'alliance parfaite entre le kéfir et le gingembre frais. Une boisson tonifiante avec une touche épicée, idéale pour stimuler votre vitalité.",
+      "description": "L'alliance parfaite entre le kéfir et le gingembre frais. Une boisson tonifiante avec une touche épicée, idéale pour stimuler ta vitalité.",
       "variants": [
         {
           "size": "75cl",
@@ -14,7 +14,7 @@
           "price": 5.00
         }
       ],
-      "image": "kefir.jpg"
+      "image": "kefir-gingembre.jpeg"
     },
     {
       "id": "kefir-concombre-kiwi",
@@ -30,7 +30,7 @@
           "price": 5.00
         }
       ],
-      "image": "kefir.jpg"
+      "image": "kefir-concombre-kiwi.jpeg"
     },
     {
       "id": "kefir-fruit-passion",
@@ -46,7 +46,7 @@
           "price": 5.00
         }
       ],
-      "image": "kefir.jpg"
+      "image": "kefir-fruit-passion.jpeg"
     },
     {
       "id": "kefir-cassis-menthe",
@@ -62,7 +62,7 @@
           "price": 5.00
         }
       ],
-      "image": "kefir.jpg"
+      "image": "kefir-cassis-menthe.jpeg"
     },
     {
       "id": "kefir-framboise-hibiscus",
@@ -78,7 +78,7 @@
           "price": 5.00
         }
       ],
-      "image": "kefir.jpg"
+      "image": "kefir-framboise-hibiscus.jpeg"
     }
   ]
 } 

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'react-hot-toast';
 import ScrollIndicator from '@/components/ScrollIndicator';
+import { getProductImageUrl } from '@/lib/utils';
 
 export default function ValidationPanier() {
   const { items, total, updateQuantity, removeItem } = useCart();
@@ -56,7 +57,7 @@ export default function ValidationPanier() {
         className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4"
       >
         <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Votre panier est vide</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Ton panier est vide</h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -92,13 +93,7 @@ export default function ValidationPanier() {
             <span className="sm:hidden">Retour</span>
           </motion.button>
 
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8"
-          >
-            Validation de votre commande
-          </motion.h1>
+
 
           {/* Récapitulatif du panier */}
           <motion.div 
@@ -107,7 +102,7 @@ export default function ValidationPanier() {
             className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
           >
             <div className="p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Récapitulatif de votre panier</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Récapitulatif de ton panier</h2>
               <AnimatePresence>
                 <div className="space-y-6">
                   {items.map((item) => (
@@ -120,7 +115,7 @@ export default function ValidationPanier() {
                     >
                       <div className="relative w-16 h-16 sm:w-20 sm:h-20 mr-3 sm:mr-4 flex-shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
                         <Image
-                          src="/kefir.jpeg"
+                          src={getProductImageUrl(item.image)}
                           alt={item.name}
                           fill
                           className="object-cover transform transition-transform duration-300 group-hover:scale-105"

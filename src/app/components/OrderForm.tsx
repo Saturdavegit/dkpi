@@ -35,12 +35,12 @@ export default function OrderForm({ product, selectedSize }: OrderFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.deliveryMethod || !formData.paymentMethod) {
-      setError('Veuillez remplir tous les champs obligatoires');
+      setError('Veilles à bien remplir tous les champs');
       return;
     }
 
     if (formData.deliveryMethod === 'delivery' && !formData.address) {
-      setError('L\'adresse est requise pour la livraison');
+      setError('Ton adresse est requise pour la livraison');
       return;
     }
 

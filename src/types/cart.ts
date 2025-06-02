@@ -33,4 +33,18 @@ export interface CartContextType {
   updateQuantity: (itemId: string, size: string, quantity: number) => void;
   clearCart: () => void;
   isMaxQuantityReached: (productId: string, size: string) => boolean;
+}
+
+export interface Order {
+  contactInfo: ContactInfo;
+  deliveryOption: 'atelier' | 'bureau' | 'domicile';
+  deliveryAddress: DeliveryAddress | null;
+  deliverySlot: DeliverySlot | null;
+  paymentMethod: 'carte' | 'especes';
+  total: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
 } 
