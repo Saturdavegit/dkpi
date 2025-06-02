@@ -14,6 +14,7 @@ import { fr } from 'date-fns/locale';
 import { addDays } from 'date-fns';
 import ScrollIndicator from '@/components/ScrollIndicator';
 import { PaymentForm } from '@/components/PaymentForm';
+import { handleStripeError, formatStripeAmount } from '@/lib/stripe-utils';
 
 registerLocale('fr', fr);
 
@@ -66,7 +67,7 @@ export default function LivraisonPaiement() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          total,
+          total: formatStripeAmount(total),
           metadata: {
             deliveryOption,
             customerName: `${contactInfo.firstName} ${contactInfo.lastName}`,
@@ -86,12 +87,7 @@ export default function LivraisonPaiement() {
 
       setClientSecret(data.clientSecret);
     } catch (error) {
-      console.error('Erreur:', error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Une erreur est survenue lors de l\'initialisation du paiement.');
-      }
+      handleStripeError(error as Error);
       // En cas d'erreur, revenir au paiement en espèces
       setPaymentMethod('especes');
     }

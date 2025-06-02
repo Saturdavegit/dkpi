@@ -34,7 +34,6 @@ COPY --from=builder /app/server.js ./server.js
 
 # Variables d'environnement
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_APP_URL=${APP_URL}
 
 # Exposition du port
 EXPOSE 3000

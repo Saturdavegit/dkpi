@@ -7,9 +7,15 @@ import {
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { motion } from 'framer-motion';
+import { handleStripeError } from '@/lib/stripe-utils';
 
-// Assurez-vous que c'est votre clé publique Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+const STRIPE_KEY = process.env.NEXT_PUBLIC_STRIPE_KEY;
+
+if (!STRIPE_KEY) {
+  throw new Error('La clé publique Stripe n\'est pas configurée');
+}
+
+const stripePromise = loadStripe(STRIPE_KEY);
 
 interface PaymentFormProps {
   clientSecret: string;
@@ -17,7 +23,7 @@ interface PaymentFormProps {
   onError: (error: string) => void;
 }
 
-const PaymentFormContent = ({onSuccess, onError }: PaymentFormProps) => {
+const PaymentFormContent = ({ onSuccess, onError }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,6 +32,7 @@ const PaymentFormContent = ({onSuccess, onError }: PaymentFormProps) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
+      onError('Le système de paiement n\'est pas initialisé');
       return;
     }
 
@@ -38,11 +45,15 @@ const PaymentFormContent = ({onSuccess, onError }: PaymentFormProps) => {
       });
 
       if (error) {
-        onError(error.message || 'Une erreur est survenue lors du paiement.');
-      } else if (paymentIntent.status === 'succeeded') {
+        handleStripeError(error);
+        onError(error.message || 'Une erreur est survenue lors du paiement');
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         onSuccess();
       }
-    }  finally {
+    } catch (error) {
+      handleStripeError(error as Error);
+      onError('Une erreur inattendue est survenue');
+    } finally {
       setIsProcessing(false);
     }
   };

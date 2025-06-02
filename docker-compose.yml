@@ -1,5 +1,7 @@
 services:
   app:
+    build:
+      context: .
     image: dkpi:latest
     ports:
       - "3000:3000"
@@ -9,7 +11,7 @@ services:
     restart: unless-stopped
     volumes:
       - /share/Container/dkpilite/data:/app/data
-      - /share/Container/dkpilite/public:/app/public
+     # - /share/Container/dkpilite/public:/app/public
     networks:
       - app_network
     healthcheck:
@@ -18,6 +20,7 @@ services:
       timeout: 10s
       retries: 3
 
+  # Cloudflare Tunnel
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: always

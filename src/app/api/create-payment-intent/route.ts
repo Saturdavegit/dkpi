@@ -14,6 +14,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { total, metadata } = body;
 
+    if (!total || total <= 0) {
+      return NextResponse.json(
+        { error: 'Le montant total est invalide' },
+        { status: 400 }
+      );
+    }
+
     // Création de l'intention de paiement
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(total * 100), // Conversion en centimes
@@ -22,6 +29,8 @@ export async function POST(request: Request) {
         enabled: true,
       },
       metadata,
+      description: `Commande de ${metadata.customerName}`,
+      receipt_email: metadata.customerEmail,
     });
 
     return NextResponse.json({ 
@@ -29,8 +38,16 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Erreur Stripe:', error);
+    
+    if (error instanceof Stripe.errors.StripeError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode || 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Erreur lors de la création de l\'intention de paiement' }, 
+      { error: 'Erreur lors de la création de l\'intention de paiement' },
       { status: 500 }
     );
   }

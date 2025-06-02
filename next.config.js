@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-
-    formats: ['image/avif', 'image/webp'], // pour de meilleures perfs
+    unoptimized: true,
+  },
+  env: {
+    STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
+    NEXT_PUBLIC_IMAGE_BASE_URL: process.env.NEXT_PUBLIC_IMAGE_BASE_URL,
   },
   async headers() {
     return [

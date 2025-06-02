@@ -10,10 +10,6 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "DKPILite",
   description: "DKPILite - Votre solution de gestion de DKP",
-  icons: {
-    icon: 'https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/favicon.png',
-    apple: 'https://kefirpourines.s3.eu-north-1.amazonaws.com/public/img/favicon.png',
-  },
 };
 
 export default function RootLayout({
