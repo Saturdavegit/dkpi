@@ -1,10 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 
-export default function CommandeConfirmee() {
+export default function ConfirmationCommande() {
+  const router = useRouter();
   const { clearCart } = useCart();
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function CommandeConfirmee() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => window.location.href = '/'}
+          onClick={() => router.push('/')}
           className="w-full py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg
             transition-all duration-200 transform hover:bg-blue-600 hover:shadow-xl active:scale-95"
         >
@@ -49,4 +51,4 @@ export default function CommandeConfirmee() {
       </motion.div>
     </div>
   );
-}
+} 

@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-    image: dkpi:latest
+    image: dkpinew:latest
     ports:
       - "3000:3000"
     environment:

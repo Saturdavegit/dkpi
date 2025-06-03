@@ -1,8 +1,6 @@
 'use client';
 
 import { Order } from '@/types/cart';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 interface AdminOrderNotificationEmailProps {
   order: Order;
@@ -13,7 +11,7 @@ export function AdminOrderNotificationEmail({ order }: AdminOrderNotificationEma
     contactInfo,
     deliveryOption,
     deliveryAddress,
-    deliverySlot,
+    deliveryDate,
     paymentMethod,
     total,
     items
@@ -39,12 +37,12 @@ export function AdminOrderNotificationEmail({ order }: AdminOrderNotificationEma
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Détails de la commande</h2>
           <div className="bg-gray-50 p-4 rounded-lg">
             <p><strong>Mode de livraison :</strong> {deliveryOption}</p>
-            {deliveryOption === 'domicile' && deliveryAddress && deliverySlot && (
+            <p><strong>Date souhaitée :</strong> {deliveryDate}</p>
+            {deliveryOption === 'domicile' && deliveryAddress && (
               <>
                 <p><strong>Adresse :</strong> {deliveryAddress.address}</p>
                 <p><strong>Ville :</strong> {deliveryAddress.city}</p>
                 <p><strong>Code postal :</strong> {deliveryAddress.zipCode}</p>
-                <p><strong>Créneau de livraison :</strong> {format(deliverySlot.date, 'dd/MM/yyyy', { locale: fr })} - {deliverySlot.timeSlot}</p>
               </>
             )}
             <p><strong>Mode de paiement :</strong> {paymentMethod}</p>

@@ -1,5 +1,5 @@
 # Stage de build
-FROM node:20-alpine AS builder
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
@@ -20,12 +20,13 @@ COPY . .
 RUN npm run build
 
 # Stage de production
-FROM node:20-alpine AS runner
+FROM node:20-bullseye AS runner
 
 WORKDIR /app
 
 # Copie des fichiers nécessaires depuis le stage de build
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/next.config.js ./next.config.js
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/public ./public

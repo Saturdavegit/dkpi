@@ -54,15 +54,15 @@ export default function ValidationPanier() {
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
-        className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4"
+        className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col items-center justify-center p-4"
       >
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Ton panier est vide</h1>
+        <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Ton panier est vide</h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/')}
-            className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+            className="text-blue-500 hover:text-blue-600 font-medium transition-colors duration-200"
           >
             Retourner à la boutique
           </motion.button>
@@ -72,7 +72,7 @@ export default function ValidationPanier() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-24 sm:pb-12">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-24 sm:pb-12">
       <ScrollIndicator />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -84,7 +84,7 @@ export default function ValidationPanier() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/')}
-            className="text-blue-700 hover:text-blue-800 font-medium flex items-center text-sm sm:text-base mb-8"
+            className="text-blue-500 hover:text-blue-600 font-medium flex items-center text-sm sm:text-base mb-8"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -93,16 +93,13 @@ export default function ValidationPanier() {
             <span className="sm:hidden">Retour</span>
           </motion.button>
 
-
-
-          {/* Récapitulatif du panier */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border-2 border-gray-200"
+            className="bg-white shadow-lg rounded-xl overflow-hidden mb-8 border border-gray-100"
           >
             <div className="p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Récapitulatif de ton panier</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-6">Récapitulatif de ton panier</h2>
               <AnimatePresence>
                 <div className="space-y-6">
                   {items.map((item) => (
@@ -111,9 +108,9 @@ export default function ValidationPanier() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      className="flex items-center py-4 border-b-2 border-gray-100 group"
+                      className="flex items-center py-4 border-b border-gray-100 group"
                     >
-                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 mr-3 sm:mr-4 flex-shrink-0 overflow-hidden rounded-lg border-2 border-gray-200">
+                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 mr-3 sm:mr-4 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200">
                         <Image
                           src={getProductImageUrl(item.image)}
                           alt={item.name}
@@ -122,27 +119,27 @@ export default function ValidationPanier() {
                         />
                       </div>
                       <div className="flex-grow min-w-0">
-                        <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{item.name}</h3>
-                        <p className="text-gray-700 text-sm font-medium">{item.size}</p>
+                        <h3 className="font-medium text-gray-800 text-sm sm:text-base truncate">{item.name}</h3>
+                        <p className="text-gray-600 text-sm font-medium">{item.size}</p>
                         <div className="flex items-center mt-2">
                           <motion.div 
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-center bg-gray-50 rounded-lg border-2 border-gray-200 shadow-sm"
+                            className="flex items-center bg-gray-50 rounded-lg border border-gray-200 shadow-sm"
                           >
                             <motion.button
                               whileTap={{ scale: 0.95 }}
                               onClick={() => handleQuantityUpdate(item.id, item.size, Math.max(1, item.quantity - 1))}
-                              className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors duration-200 font-medium"
+                              className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors duration-200 font-medium"
                             >
                               -
                             </motion.button>
-                            <span className="px-3 text-gray-900 text-sm sm:text-base font-medium">
+                            <span className="px-3 text-gray-700 text-sm sm:text-base font-medium">
                               {item.quantity}
                             </span>
                             <motion.button
                               whileTap={{ scale: 0.95 }}
                               onClick={() => handleQuantityUpdate(item.id, item.size, Math.min(3, item.quantity + 1))}
-                              className="px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={item.quantity >= 3}
                             >
                               +
@@ -152,7 +149,7 @@ export default function ValidationPanier() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleRemoveFromCart(item.id, item.size)}
-                            className="ml-3 text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200"
+                            className="ml-3 text-red-500 hover:text-red-600 text-sm font-medium transition-colors duration-200"
                           >
                             Supprimer
                           </motion.button>
@@ -162,7 +159,7 @@ export default function ValidationPanier() {
                         <motion.p 
                           initial={{ scale: 1 }}
                           animate={{ scale: [1, 1.1, 1] }}
-                          className="font-semibold text-gray-900 text-sm sm:text-base whitespace-nowrap"
+                          className="font-semibold text-gray-800 text-sm sm:text-base whitespace-nowrap"
                         >
                           {(item.price * item.quantity).toFixed(2)}€
                         </motion.p>
@@ -174,14 +171,14 @@ export default function ValidationPanier() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex justify-between items-center pt-6 border-t-2 border-gray-100 mt-6"
+                className="flex justify-between items-center pt-6 border-t border-gray-100 mt-6"
               >
-                <span className="text-lg font-bold text-gray-900">Total</span>
+                <span className="text-lg font-bold text-gray-800">Total</span>
                 <motion.span
                   key={total}
                   initial={{ scale: 1 }}
                   animate={{ scale: [1, 1.1, 1] }}
-                  className="text-lg font-bold text-gray-900"
+                  className="text-lg font-bold text-gray-800"
                 >
                   {total.toFixed(2)}€
                 </motion.span>
@@ -189,7 +186,6 @@ export default function ValidationPanier() {
             </div>
           </motion.div>
 
-          {/* Bouton de validation */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -199,8 +195,8 @@ export default function ValidationPanier() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push('/livraison-paiement')}
-              className="w-full sm:w-auto px-12 py-4 bg-blue-700 text-white font-semibold rounded-lg shadow-lg
-                transition-all duration-200 transform hover:bg-blue-800 hover:shadow-xl active:scale-95"
+              className="w-full sm:w-auto px-12 py-4 bg-blue-500 text-white font-semibold rounded-lg shadow-lg
+                transition-all duration-200 transform hover:bg-blue-600 hover:shadow-xl active:scale-95"
             >
               Continuer vers la livraison
             </motion.button>

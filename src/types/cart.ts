@@ -39,7 +39,7 @@ export interface Order {
   contactInfo: ContactInfo;
   deliveryOption: 'atelier' | 'bureau' | 'domicile';
   deliveryAddress: DeliveryAddress | null;
-  deliverySlot: DeliverySlot | null;
+  deliveryDate: string;
   paymentMethod: 'carte' | 'especes';
   total: number;
   items: Array<{

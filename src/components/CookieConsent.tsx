@@ -70,8 +70,8 @@ export default function CookieConsentBanner() {
         borderRadius: '4px'
       }}
     >
-      Salut&nbsp;! 👋 Pour te proposer un paiement sécurisé, j&apos;utilise des cookies essentiels et des cookies tiers (Stripe) pour le traitement des paiements par carte.&nbsp;
-      Si tu refuses les cookies, le paiement par carte ne sera pas disponible.&nbsp;
+      Salut&nbsp;! 👋 J&apos;utilise des cookies essentiels et des cookies tiers pour le traitement des paiements par carte.&nbsp;
+      Si tu les refuses, le paiement CB ne sera pas disponible.&nbsp;
       Pour plus d&apos;infos, jette un œil à ma{' '}
       <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300">
         politique de confidentialité

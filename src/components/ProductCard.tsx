@@ -59,29 +59,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-56">
         <Image
           src={getProductImageUrl(product.image)}
           alt={product.name}
           fill
           className="object-cover transform transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            console.error('Image loading error:', e);
-            console.log('Attempted URL:', getProductImageUrl(product.image));
-          }}
         />
       </div>
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
-        <p className="text-gray-700 text-sm mb-6 min-h-[3rem]">{product.description}</p>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+        <p className="text-gray-600 text-sm mb-6 min-h-[3rem]">{product.description}</p>
         
         <div className="space-y-4">
           <div className="flex justify-between items-center gap-4">
             <select
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
-              className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 font-medium focus:ring-2 focus:ring-blue-400 focus:border-blue-400 appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
               style={{
                 backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%234B5563\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
                 backgroundRepeat: 'no-repeat',
@@ -100,16 +96,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-l-lg transition-colors"
+                className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
               >
                 -
               </button>
-              <span className="px-4 py-2 text-gray-900 font-medium border-x border-gray-200">
+              <span className="px-4 py-2 text-gray-700 font-medium border-x border-gray-200">
                 {quantity}
               </span>
               <button
                 onClick={() => setQuantity(Math.min(3, quantity + 1))}
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-r-lg transition-colors disabled:bg-gray-50 disabled:text-gray-400"
+                className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors disabled:bg-gray-50 disabled:text-gray-400"
                 disabled={quantity >= 3 || maxQuantityReached}
               >
                 +
@@ -122,8 +118,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             disabled={maxQuantityReached}
             className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
               maxQuantityReached
-                ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm'
             }`}
           >
             {maxQuantityReached

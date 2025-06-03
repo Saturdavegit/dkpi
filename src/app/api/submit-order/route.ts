@@ -22,6 +22,7 @@ interface OrderData {
     total: number;
   };
   total: number;
+  deliveryDate: string;
 }
 
 function formatCartItems(items: CartItem[]): string {
@@ -37,14 +38,15 @@ function formatDeliveryInfo(data: OrderData): string {
   let deliveryInfo = `Mode de livraison : ${data.deliveryOption === 'atelier' ? 'Retrait à l\'atelier' : 
     data.deliveryOption === 'bureau' ? 'Retrait au bureau de Levallois' : 'Livraison à domicile'}`;
 
-  if (data.deliveryOption === 'domicile' && data.deliveryAddress && data.deliverySlot) {
+  if (data.deliveryOption === 'domicile' && data.deliveryAddress) {
     deliveryInfo += `
     Adresse : ${data.deliveryAddress.address}
     Code postal : ${data.deliveryAddress.zipCode}
-    Ville : ${data.deliveryAddress.city}
-    Date de livraison : ${new Date(data.deliverySlot.date).toLocaleDateString('fr-FR')}
-    Créneau horaire : ${data.deliverySlot.timeSlot}`;
+    Ville : ${data.deliveryAddress.city}`;
   }
+
+  deliveryInfo += `
+    Date souhaitée : ${data.deliveryDate}`;
 
   return deliveryInfo;
 }
@@ -120,7 +122,7 @@ Total : ${data.total.toFixed(2)}€
         text: `
 Hello ${data.contactInfo.firstName},
 
-J'ai bien reçu ta commande et je suis ravie de te préparer ton kéfir.
+J'ai bien reçu ta commande et je suis ravie de préparer ton kéfir.
 
 Petit recap :
 ${formatCartItems(data.cart.items)}
