@@ -29,7 +29,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderFormData, total
         
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">Bonjour ${orderData.name},</p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">Nous avons bien reçu votre commande. Voici le récapitulatif :</p>
-        
+    
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <h3 style="color: #2D3748; font-size: 18px; margin-bottom: 15px;">Détails de la commande</h3>
           <ul style="list-style: none; padding: 0; margin: 0;">
@@ -58,7 +58,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderFormData, total
             <li style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #E2E8F0;">
               <strong style="color: #4A5568;">Total :</strong> ${totalPrice.toFixed(2)} €
             </li>
-          </ul>
+    </ul>
         </div>
 
         ${orderData.timeSlot ? `

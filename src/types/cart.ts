@@ -1,11 +1,11 @@
-export interface CartItem {
+export type CartItem = {
   id: string;
+  variantId: string;
+  quantity: number;
   name: string;
   size: string;
   price: number;
-  quantity: number;
-  image: string;
-}
+};
 
 export interface ContactInfo {
   firstName: string;
@@ -15,9 +15,9 @@ export interface ContactInfo {
 }
 
 export interface DeliveryAddress {
-  address: string;
+  street: string;
   city: string;
-  zipCode: string;
+  postalCode: string;
 }
 
 export interface DeliverySlot {
@@ -25,15 +25,22 @@ export interface DeliverySlot {
   timeSlot: string;
 }
 
-export interface CartContextType {
+export type CartContextType = {
   items: CartItem[];
   total: number;
-  addItem: (item: CartItem) => void;
-  removeItem: (itemId: string, size: string) => void;
-  updateQuantity: (itemId: string, size: string, quantity: number) => void;
+  addToCart: (productId: string, variantId: string) => void;
+  removeFromCart: (productId: string, variantId: string) => void;
+  getProductQuantity: (productId: string, variantId: string) => number;
   clearCart: () => void;
-  isMaxQuantityReached: (productId: string, size: string) => boolean;
-}
+  deliveryMethod: 'atelier' | 'bureau' | 'domicile' | null;
+  setDeliveryMethod: (method: 'atelier' | 'bureau' | 'domicile' | null) => void;
+  deliveryDate: Date | null;
+  setDeliveryDate: (date: Date | null) => void;
+  deliveryAddress: DeliveryAddress | null;
+  setDeliveryAddress: (address: DeliveryAddress | null) => void;
+  contactInfo: ContactInfo | null;
+  setContactInfo: (info: ContactInfo | null) => void;
+};
 
 export interface Order {
   contactInfo: ContactInfo;
@@ -43,6 +50,8 @@ export interface Order {
   paymentMethod: 'carte' | 'especes';
   total: number;
   items: Array<{
+    id: string;
+    variantId: string;
     name: string;
     quantity: number;
     price: number;

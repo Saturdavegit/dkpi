@@ -1,15 +1,16 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import CookieConsentBanner from "@/components/CookieConsent";
-import CartButton from "@/components/CartButton";
 import { Metadata } from 'next';
+import { CartProvider } from '@/context/CartContext';
 import Providers from "@/components/Providers";
+import { HeaderProvider } from '@/context/HeaderContext';
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Du k\u00E9fir by Claire",
-  description: "Du k\u00E9fir by Claire - K\u00E9fir artisanal fait avec amour",
+  title: "DKPI Lite",
+  description: "DKPI Lite - Votre plateforme de gestion de commandes",
 };
 
 export default function RootLayout({
@@ -21,12 +22,13 @@ export default function RootLayout({
     <html lang="fr">
       <body className={inter.className}>
         <Providers>
-          <div className="relative min-h-screen">
-            <CartButton />
-            {children}
-          </div>
+          <HeaderProvider>
+            <div className="relative min-h-screen">
+              {children}
+            </div>
+            <CookieConsentBanner />
+          </HeaderProvider>
         </Providers>
-        <CookieConsentBanner />
       </body>
     </html>
   );

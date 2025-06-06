@@ -3,19 +3,25 @@
 import { ProductCard } from '@/components/ProductCard';
 import products from '@/data/products.json';
 import { motion } from 'framer-motion';
+import CartButton from '@/components/CartButton';
+import Header from '@/components/Header';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Header />
+
+      {/* Bouton panier sticky */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <CartButton />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Du kéfir pour Inès (By Claire)
-          </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Découvres mes kéfirs fait maison, préparés avec passion et des ingrédients de qualité.
             Une boisson vivante, pleine de bienfaits et PAS que pour Inès !

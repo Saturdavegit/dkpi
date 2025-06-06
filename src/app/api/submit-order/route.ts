@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { transporter, verifyEmailConnection } from '@/lib/email-config';
 import { CartItem, ContactInfo, DeliveryAddress, DeliverySlot } from '@/types/cart';
+import products from '@/data/products.json';
 
 // Vérification des variables d'environnement requises
 const requiredEnvVars = ['SMTP_FROM', 'ADMIN_EMAIL'];
@@ -25,28 +26,70 @@ interface OrderData {
   deliveryDate: string;
 }
 
+type ValidationError = 'INCOMPLETE_ADDRESS' | 'INVALID_EMAIL' | 'INVALID_PHONE' | 'EMPTY_CART';
+
+function validateOrderData(data: OrderData): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  // Validation de l'email
+  if (!data.contactInfo.email || !data.contactInfo.email.includes('@')) {
+    errors.push('INVALID_EMAIL');
+  }
+
+  // Validation du téléphone
+  if (!data.contactInfo.phone || data.contactInfo.phone.length < 10) {
+    errors.push('INVALID_PHONE');
+  }
+
+  // Validation du panier
+  if (!data.cart.items || data.cart.items.length === 0) {
+    errors.push('EMPTY_CART');
+  }
+
+  // Validation de l'adresse pour la livraison à domicile
+  if (data.deliveryOption === 'domicile' && (!data.deliveryAddress || 
+      !data.deliveryAddress.street || 
+      !data.deliveryAddress.postalCode || 
+      !data.deliveryAddress.city)) {
+    errors.push('INCOMPLETE_ADDRESS');
+  }
+
+  return errors;
+}
+
+function getProductDetails(productId: string, variantId: string) {
+  const product = products.products.find(p => p.id === productId);
+  const variant = product?.variants.find(v => v.id === variantId);
+  return { product, variant };
+}
+
 function formatCartItems(items: CartItem[]): string {
-  return items.map(item => `
-    - ${item.name} (${item.size})
+  return items.map(item => {
+    const { product, variant } = getProductDetails(item.id, item.variantId);
+    if (!product || !variant) return '';
+    
+    return `
+    - ${product.name} (${variant.size})
     Quantité : ${item.quantity}
-    Prix unitaire : ${item.price.toFixed(2)}€
-    Sous-total : ${(item.price * item.quantity).toFixed(2)}€
-  `).join('\n');
+    Prix unitaire : ${variant.price.toFixed(2)}€
+    Sous-total : ${(variant.price * item.quantity).toFixed(2)}€
+  `;
+  }).join('\n');
 }
 
 function formatDeliveryInfo(data: OrderData): string {
   let deliveryInfo = `Mode de livraison : ${data.deliveryOption === 'atelier' ? 'Retrait à l\'atelier' : 
     data.deliveryOption === 'bureau' ? 'Retrait au bureau de Levallois' : 'Livraison à domicile'}`;
 
-  if (data.deliveryOption === 'domicile' && data.deliveryAddress) {
-    deliveryInfo += `
-    Adresse : ${data.deliveryAddress.address}
-    Code postal : ${data.deliveryAddress.zipCode}
-    Ville : ${data.deliveryAddress.city}`;
-  }
-
   deliveryInfo += `
     Date souhaitée : ${data.deliveryDate}`;
+
+  if (data.deliveryOption === 'domicile' && data.deliveryAddress) {
+    deliveryInfo += `
+    Adresse de livraison :
+    ${data.deliveryAddress.street}
+    ${data.deliveryAddress.postalCode} ${data.deliveryAddress.city}`;
+  }
 
   return deliveryInfo;
 }
@@ -66,7 +109,33 @@ export async function POST(request: NextRequest) {
         hasItems: data.cart ? !!data.cart.items : false,
         itemsType: data.cart && data.cart.items ? typeof data.cart.items : 'undefined'
       });
-      throw new Error('Structure de données invalide: cart.items doit être un tableau');
+      return NextResponse.json({ 
+        success: false,
+        message: 'Structure de données invalide: cart.items doit être un tableau'
+      }, { status: 400 });
+    }
+
+    // Validation des données
+    const validationErrors = validateOrderData(data);
+    if (validationErrors.length > 0) {
+      // Si le paiement est en espèces, on bloque sur toutes les erreurs
+      if (data.paymentMethod === 'especes') {
+        return NextResponse.json({ 
+          success: false,
+          message: 'Erreur de validation',
+          errors: validationErrors
+        }, { status: 400 });
+      }
+      
+      // Pour le paiement par carte, on ne bloque que sur les erreurs critiques
+      const criticalErrors = validationErrors.filter((error: ValidationError) => error !== 'INCOMPLETE_ADDRESS');
+      if (criticalErrors.length > 0) {
+        return NextResponse.json({ 
+          success: false,
+          message: 'Erreur de validation',
+          errors: criticalErrors
+        }, { status: 400 });
+      }
     }
 
     // Si les variables d'environnement sont manquantes, on ne peut pas envoyer d'emails
@@ -84,7 +153,10 @@ export async function POST(request: NextRequest) {
     // Vérifier la connexion SMTP avant d'envoyer les emails
     const isEmailConnected = await verifyEmailConnection();
     if (!isEmailConnected) {
-      throw new Error('Impossible de se connecter au serveur SMTP');
+      return NextResponse.json({ 
+        success: false,
+        message: 'Impossible de se connecter au serveur SMTP'
+      }, { status: 500 });
     }
 
     try {
@@ -145,7 +217,10 @@ Claire 🌱
       });
     } catch (emailError) {
       console.error('Erreur lors de l\'envoi des emails:', emailError);
-      throw new Error('Erreur lors de l\'envoi des emails de confirmation');
+      return NextResponse.json({ 
+        success: false,
+        message: 'Erreur lors de l\'envoi des emails de confirmation'
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

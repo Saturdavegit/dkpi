@@ -47,7 +47,7 @@ export function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <PaymentElement />
+      <PaymentElement />
       </div>
       <motion.button
         whileHover={{ scale: 1.02 }}
@@ -70,6 +70,6 @@ export function PaymentForm({ onSuccess, onError }: PaymentFormProps) {
           </span>
         ) : 'Payer maintenant'}
       </motion.button>
-    </div>
-  );
-} 
+      </div>
+    );
+  }

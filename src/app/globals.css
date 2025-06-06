@@ -1,20 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e5e7eb;
+  --background: #355a4a;
   --foreground: #111827;
   --input-text: #111827;
   --input-placeholder: #4B5563;
   --border-color: #9CA3AF;
   --focus-ring: #2563eb;
   --focus-ring-opacity: 0.25;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,11 +21,53 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .gradient-button {
+    @apply bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200;
+  }
+}
+
+.page-container {
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.page-container.exiting {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+html {
+  overscroll-behavior-y: none;
+}
+
+/* Styles personnalisés pour la barre de défilement */
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: #f0f9ff; /* Couleur de fond bleu clair */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #1e293b; /* Couleur du curseur proche du noir */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #0f172a; /* Couleur du curseur au survol */
+}
+
+/* Pour Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b #f0f9ff;
+}
 
 /* Styles personnalisés pour les inputs */
 input[type="text"],

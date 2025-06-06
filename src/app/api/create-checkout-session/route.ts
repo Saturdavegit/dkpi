@@ -13,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { cart, contactInfo, deliveryOption, deliveryAddress,} = body;
+    const { cart, contactInfo, deliveryOption } = body;
 
     // Création des line items à partir du panier
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cart.items.map((item: CartItem) => ({
@@ -53,7 +53,6 @@ export async function POST(request: Request) {
         deliveryOption,
         customerName: `${contactInfo.firstName} ${contactInfo.lastName}`,
         customerPhone: contactInfo.phone,
-        deliveryAddress: deliveryOption === 'domicile' ? JSON.stringify(deliveryAddress) : '',
       },
     });
 
@@ -61,9 +60,9 @@ export async function POST(request: Request) {
       sessionId: session.id 
     });
   } catch (error) {
-    console.error('Erreur Stripe:', error);
+    console.error('Erreur lors de la création de la session Stripe:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la création de la session de paiement' }, 
+      { error: 'Erreur lors de la création de la session de paiement' },
       { status: 500 }
     );
   }

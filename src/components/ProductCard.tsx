@@ -1,153 +1,85 @@
-import React, { useState } from 'react';
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
-import { useCart } from '../context/CartContext';
-import { toast, Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import { getProductImageUrl } from '@/lib/utils';
+import { Product } from '@/types/product';
+import { useCart } from '@/context/CartContext';
+import ImageModal from './ImageModal';
 
 type ProductCardProps = {
-  product: {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    variants: Array<{
-      size: string;
-      price: number;
-    }>;
-  };
+  product: Product;
 };
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const [selectedSize, setSelectedSize] = useState(product.variants[0].size);
-  const [quantity, setQuantity] = useState(1);
-  const { addItem, isMaxQuantityReached } = useCart();
-
-  const selectedVariant = product.variants.find(v => v.size === selectedSize);
-  const maxQuantityReached = isMaxQuantityReached(product.id, selectedSize);
-
-  const handleAddToCart = () => {
-    if (selectedVariant && !maxQuantityReached) {
-      const cartItem = {
-        id: product.id,
-        name: product.name,
-        size: selectedSize,
-        price: selectedVariant.price,
-        quantity: quantity,
-        image: product.image
-      };
-      
-      addItem(cartItem);
-      setQuantity(1);
-      toast.success(
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{quantity > 1 ? `${quantity} ${product.name} ajoutés` : `${product.name} ajouté`}</span>
-        </div>,
-        {
-          duration: 2000,
-          position: 'top-center',
-          className: '!bg-blue-600 !text-white !z-50',
-          style: {
-            padding: '16px',
-            borderRadius: '10px',
-            background: '#2563eb',
-            color: '#fff',
-            zIndex: 50,
-          },
-        }
-      );
-    }
-  };
+export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart, removeFromCart, getProductQuantity } = useCart();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-56">
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      <div className="relative aspect-square cursor-pointer group" onClick={() => setIsModalOpen(true)}>
         <Image
           src={getProductImageUrl(product.image)}
           alt={product.name}
           fill
-          className="object-cover transform transition-transform duration-300 group-hover:scale-105"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
-        <p className="text-gray-600 text-sm mb-6 min-h-[3rem]">{product.description}</p>
-        
-        <div className="space-y-4">
-          <div className="flex justify-between items-center gap-4">
-            <select
-              value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
-              className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 font-medium focus:ring-2 focus:ring-blue-400 focus:border-blue-400 appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
-              style={{
-                backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%234B5563\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 0.75rem center',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem'
-              }}
-            >
-              {product.variants.map(variant => (
-                <option key={variant.size} value={variant.size} className="py-2">
-                  {variant.size} - {variant.price.toFixed(2)}€
-                </option>
-              ))}
-            </select>
-            
-            <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
-              >
-                -
-              </button>
-              <span className="px-4 py-2 text-gray-700 font-medium border-x border-gray-200">
-                {quantity}
-              </span>
-              <button
-                onClick={() => setQuantity(Math.min(3, quantity + 1))}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors disabled:bg-gray-50 disabled:text-gray-400"
-                disabled={quantity >= 3 || maxQuantityReached}
-              >
-                +
-              </button>
-            </div>
-          </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={maxQuantityReached}
-            className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
-              maxQuantityReached
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm'
-            }`}
-          >
-            {maxQuantityReached
-              ? 'Limite atteinte (3 max)'
-              : 'Ajouter au panier'}
-          </button>
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2 hover:text-blue-600 transition-colors duration-200">
+          {product.name}
+        </h3>
+        <p className="text-gray-600 mb-6 leading-relaxed">{product.description}</p>
+
+        <div className="space-y-4">
+          {product.variants.map((variant) => {
+            const quantity = getProductQuantity(product.id, variant.id);
+            return (
+              <div key={variant.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                <div className="flex-1">
+                  <p className="font-medium text-gray-800">
+                    {variant.size} - <span className="text-blue-600">{variant.price.toFixed(2)} €</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => removeFromCart(product.id, variant.id)}
+                      className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors duration-200 font-medium disabled:opacity-30"
+                      disabled={quantity === 0}
+                    >
+                      -
+                    </motion.button>
+                    <span className="px-3 text-gray-700 text-sm font-medium min-w-[2rem] text-center">
+                      {quantity}
+                    </span>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => addToCart(product.id, variant.id)}
+                      className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors duration-200 font-medium disabled:opacity-30"
+                      disabled={quantity >= 3}
+                    >
+                      +
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-      <Toaster
-        containerStyle={{
-          top: 20,
-          left: 20,
-          bottom: 20,
-          right: 20,
-          zIndex: 9999,
-        }}
-        toastOptions={{
-          className: '!z-50',
-          style: {
-            zIndex: 50,
-            background: '#fff',
-            color: '#000',
-            padding: '16px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          },
-        }}
+
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        image={product.image}
+        name={product.name}
       />
     </div>
   );
-}; 
+} 
